@@ -1,0 +1,31 @@
+============================================================
+COURSE SCHEDULE
+============================================================
+
+Monday:
+----------------------------------------
+  11:00-12:30: cs101 - Introduction to Programming
+      Room: room202, Prof: Dr. Alice Smith
+
+Tuesday:
+----------------------------------------
+  16:00-17:30: cs202 - Algorithms
+      Room: room202, Prof: Dr. Bob Johnson
+
+Wednesday:
+----------------------------------------
+  No classes scheduled
+
+Thursday:
+----------------------------------------
+  No classes scheduled
+
+Friday:
+----------------------------------------
+  11:00-12:30: cs201 - Data Structures
+      Room: room101, Prof: Dr. Alice Smith
+
+Fitness Score: 715.00
+Constraints Violated: 0
+Courses Scheduled: 3/4
+============================================================

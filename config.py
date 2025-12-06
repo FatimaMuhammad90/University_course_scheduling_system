@@ -1,55 +1,57 @@
+# config.py - COMPLETE CONFIGURATION FILE
 """
-Configuration file for University Scheduling System
-All tunable parameters go here
+Configuration for University Scheduling System
 """
 
-# ============================================
-# ALGORITHM PARAMETERS
-# ============================================
+# ==================== ALGORITHM CONFIGURATION ====================
 ALGORITHM_CONFIG = {
     'csp': {
         'max_backtracks': 1000,
-        'use_mrv': True,           # Minimum Remaining Values heuristic
-        'use_degree': True,        # Degree heuristic
-        'use_lcv': True,           # Least Constraining Value
-        'timeout': 30,             # seconds
+        'use_mrv': True,
+        'use_degree': True,
+        'use_lcv': True,
+        'timeout': 30,
     },
     
     'genetic': {
-        'population_size': 100,
-        'generations': 1000,
-        'mutation_rate': 0.15,
-        'crossover_rate': 0.85,
-        'elitism_count': 5,        # Keep top 5 each generation
+        'population_size': 50,
+        'generations': 200,
+        'mutation_rate': 0.1,
+        'crossover_rate': 0.8,
+        'elitism_count': 3,
         'tournament_size': 3,
     },
     
     'a_star': {
         'heuristic_weight': 1.0,
-        'walking_weight': 0.7,     # Weight for student walking distance
-        'preference_weight': 0.3,  # Weight for professor preferences
+        'walking_weight': 0.7,
+        'preference_weight': 0.3,
     },
     
     'hill_climbing': {
         'max_iterations': 500,
-        'restarts': 10,            # Random restarts to avoid local maxima
-        'neighbor_size': 20,       # Number of neighbors to generate
+        'restarts': 3,
+        'neighbor_size': 15,
     },
     
     'bfs': {
-        'max_depth': 10,
-        'max_nodes': 10000,
+        'max_depth': 5,
+        'max_nodes': 2000,
+    },
+    
+    'iterative_deepening': {
+        'max_depth': 5,
+        'depth_increment': 1,
     },
     
     'ucs': {
         'room_cost_weight': 1.0,
         'time_pref_weight': 0.5,
+        'walking_cost_weight': 0.3,
     }
 }
 
-# ============================================
-# SCHEDULING PARAMETERS
-# ============================================
+# ==================== TIME SETTINGS ====================
 TIME_SLOTS = [
     "8:00-9:30",   # Slot 0
     "9:30-11:00",  # Slot 1
@@ -67,29 +69,20 @@ DAYS = [
     "friday"
 ]
 
-# ============================================
-# CONSTRAINTS & PENALTIES
-# ============================================
-CONSTRAINTS = {
-    'hard': {
-        'room_capacity': True,
-        'no_double_booking': True,
-        'professor_availability': True,
-        'time_conflict': True,
-    },
-    
-    'soft': {
-        'room_preference_penalty': 10,      # Points deducted
-        'time_preference_penalty': 5,
-        'consecutive_classes_bonus': 15,    # Points added
-        'department_cluster_bonus': 20,
-    }
-}
-
-# ============================================
-# FIXED SETTINGS
-# ============================================
 SLOT_DURATION = 1.5  # hours
-MAX_PROFESSOR_HOURS = 12  # per week
-MIN_STUDENTS_PER_COURSE = 10
-MAX_STUDENTS_PER_ROOM = 300
+MAX_PROFESSOR_HOURS = 12
+WORK_HOURS = {"start": "8:00", "end": "18:00"}
+
+# ==================== FITNESS WEIGHTS ====================
+FITNESS_WEIGHTS = {
+    'hard_constraint_violation': -10000,
+    'empty_schedule_penalty': -10000,
+    'incomplete_schedule_penalty': -500,
+    'room_capacity_penalty': -50,
+    'professor_overload_penalty': -100,
+    'time_preference_bonus': 20,
+    'room_preference_bonus': 15,
+    'consecutive_classes_bonus': 10,
+    'department_clustering_bonus': 25,
+    'completion_bonus': 1000,
+}

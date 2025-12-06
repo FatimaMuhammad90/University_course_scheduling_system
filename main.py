@@ -1,3 +1,34 @@
+# main.py - UPDATED VERSION (DFS REMOVED)
+import sys
+import os
+
+# Add fallback configuration if config.py doesn't exist
+try:
+    import config
+except ImportError:
+    print(" config.py not found, using default configuration")
+    
+    # Create simple config module
+    class SimpleConfig:
+        ALGORITHM_CONFIG = {
+            'csp': {'max_backtracks': 1000, 'timeout': 30},
+            'genetic': {'population_size': 50, 'generations': 200},
+            'a_star': {},
+            'hill_climbing': {'max_iterations': 500},
+            'bfs': {'max_depth': 5, 'max_nodes': 2000},
+            'iterative_deepening': {'max_depth': 5},
+            'ucs': {}
+        }
+        TIME_SLOTS = ["8:00-9:30", "9:30-11:00", "11:00-12:30", 
+                     "13:00-14:30", "14:30-16:00", "16:00-17:30"]
+        DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday"]
+        FITNESS_WEIGHTS = {
+            'hard_constraint_violation': -1000,
+            'time_preference_bonus': 20,
+        }
+    
+    sys.modules['config'] = SimpleConfig()
+    import config
 
 """
 University Course Scheduling System - Main Entry Point
@@ -6,7 +37,7 @@ University Course Scheduling System - Main Entry Point
 import json
 import time
 from models import course, room, professor, schedule
-from algorithms import csp, genetic, a_star, hill_climbing, bfs_schedule, dfs_schedule, iterative_deepening, ucs
+from algorithms import csp, genetic, a_star, hill_climbing, bfs, iterative_deepening, ucs
 import config
 
 def load_sample_data():
@@ -243,7 +274,7 @@ def demonstrate_all_algorithms():
     print("Use case: Emergency scheduling (minimal changes)")
     
     start_time = time.time()
-    bfs_result = bfs_schedule(initial_schedule, max_depth=5)
+    bfs_result = bfs(initial_schedule, max_depth=5)  # Fixed function name
     bfs_time = time.time() - start_time
     
     if bfs_result:
@@ -254,36 +285,16 @@ def demonstrate_all_algorithms():
             'assignments': len(bfs_result.assignments)
         }
     
-    # 6. DFS
+    # 6. Iterative Deepening
     print("\n" + "=" * 70)
-    print("6. DEPTH-FIRST SEARCH (DFS)")
-    print("=" * 70)
-    print("Purpose: Memory-efficient exploration")
-    print("Method: Depth-first exploration with backtracking")
-    print("Use case: When memory is limited")
-    
-    start_time = time.time()
-    dfs_result = dfs_schedule(initial_schedule, max_depth=5)
-    dfs_time = time.time() - start_time
-    
-    if dfs_result:
-        results['DFS'] = {
-            'schedule': dfs_result,
-            'time': dfs_time,
-            'fitness': dfs_result.calculate_fitness(),
-            'assignments': len(dfs_result.assignments)
-        }
-    
-    # 7. Iterative Deepening
-    print("\n" + "=" * 70)
-    print("7. ITERATIVE DEEPENING")
+    print("6. ITERATIVE DEEPENING")
     print("=" * 70)
     print("Purpose: Combines BFS completeness with DFS memory efficiency")
-    print("Method: Repeated DFS with increasing depth limits")
+    print("Method: Repeated depth-limited search with increasing limits")
     print("Use case: When unsure about solution depth")
     
     start_time = time.time()
-    id_result = iterative_deepening(initial_schedule, max_depth=5)
+    id_result = iterative_deepening(initial_schedule, max_depth=5)  # Fixed function name
     id_time = time.time() - start_time
     
     if id_result:
@@ -294,9 +305,9 @@ def demonstrate_all_algorithms():
             'assignments': len(id_result.assignments)
         }
     
-    # 8. Uniform Cost Search
+    # 7. Uniform Cost Search
     print("\n" + "=" * 70)
-    print("8. UNIFORM COST SEARCH (UCS)")
+    print("7. UNIFORM COST SEARCH (UCS)")
     print("=" * 70)
     print("Purpose: Find minimum cost schedule")
     print("Method: Cost-based priority queue")
@@ -352,9 +363,8 @@ def demonstrate_all_algorithms():
 3. A*: Optimal when good heuristics are available (walking distance, preferences)
 4. Hill Climbing: Efficient for local optimization of existing schedules
 5. BFS: Guarantees minimal changes - ideal for emergency scenarios
-6. DFS: Memory-efficient for exploring deep constraint chains
-7. Iterative Deepening: Best of BFS and DFS - complete but memory-efficient
-8. UCS: Essential for budget-conscious scheduling with cost optimization
+6. Iterative Deepening: Complete search with memory efficiency - best of both worlds
+7. UCS: Essential for budget-conscious scheduling with cost optimization
     """)
 
 def save_schedule_to_file(schedule_obj, filename="output/schedule.txt"):
@@ -409,7 +419,7 @@ def emergency_scenario_demo():
         # Use BFS for minimal changes
         print("\nUsing BFS for minimal-change rescheduling...")
         start_time = time.time()
-        new_schedule = bfs_schedule(emergency_schedule, max_depth=3)
+        new_schedule = bfs(emergency_schedule, max_depth=3)  # Fixed function name
         rescue_time = time.time() - start_time
         
         if new_schedule:
@@ -419,14 +429,14 @@ def emergency_scenario_demo():
         else:
             print("  ✗ Could not reschedule with BFS")
             
-            # Try DFS as backup
-            print("\nTrying DFS as backup...")
+            # Try Iterative Deepening as backup
+            print("\nTrying Iterative Deepening as backup...")
             start_time = time.time()
-            new_schedule = dfs_schedule(emergency_schedule, max_depth=5)
+            new_schedule = iterative_deepening(emergency_schedule, max_depth=5)  # Fixed function name
             rescue_time = time.time() - start_time
             
             if new_schedule:
-                print(f"  ✓ Rescheduled with DFS in {rescue_time:.2f} seconds")
+                print(f"  ✓ Rescheduled with Iterative Deepening in {rescue_time:.2f} seconds")
 
 def main():
     """Main function"""
@@ -458,11 +468,10 @@ def run_specific_algorithm():
     print("3. A* Search")
     print("4. Hill Climbing")
     print("5. BFS")
-    print("6. DFS")
-    print("7. Iterative Deepening")
-    print("8. Uniform Cost Search")
+    print("6. Iterative Deepening")
+    print("7. Uniform Cost Search")
     
-    choice = input("\nSelect algorithm (1-8): ").strip()
+    choice = input("\nSelect algorithm (1-7): ").strip()
     
     data = load_sample_data()
     initial_schedule = schedule(
@@ -486,12 +495,10 @@ def run_specific_algorithm():
         solver = hill_climbing(initial_schedule)
         result = solver.optimize()
     elif choice == "5":
-        result = bfs_schedule(initial_schedule)
+        result = bfs(initial_schedule)  # Fixed function name
     elif choice == "6":
-        result = dfs_schedule(initial_schedule)
+        result = iterative_deepening(initial_schedule)  # Fixed function name
     elif choice == "7":
-        result = iterative_deepening(initial_schedule)
-    elif choice == "8":
         solver = ucs(initial_schedule)
         result = solver.find_min_cost_schedule()
     else:
@@ -509,6 +516,21 @@ def run_specific_algorithm():
         print(result)
     else:
         print("❌ Algorithm failed to find solution")
+
+    # In config.py, update FITNESS_WEIGHTS:
+
+    FITNESS_WEIGHTS = {
+        'hard_constraint_violation': -10000,
+        'empty_schedule_penalty': -10000,  # NEW
+        'incomplete_schedule_penalty': -500,  # NEW
+        'room_capacity_penalty': -50,
+        'professor_overload_penalty': -100,
+        'time_preference_bonus': 20,
+        'room_preference_bonus': 15,
+        'consecutive_classes_bonus': 10,
+        'department_clustering_bonus': 25,
+        'completion_bonus': 1000,  # NEW - bonus per assigned course
+    }
 
 if __name__ == "__main__":
     main()

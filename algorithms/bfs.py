@@ -1,8 +1,9 @@
+# algorithms/bfs.py - FIXED NAMES
 from collections import deque
 import config
 from models import schedule
 
-def bfs_schedule(initial_schedule, max_depth=None):
+def bfs(initial_schedule, max_depth=None):
     """BFS for course scheduling"""
     if max_depth is None:
         max_depth = config.ALGORITHM_CONFIG['bfs']['max_depth']
@@ -26,7 +27,7 @@ def bfs_schedule(initial_schedule, max_depth=None):
         # Check if complete
         if len(path) == len(current_sched.courses):
             if current_sched.is_valid():
-                print(f"\n BFS found solution at depth {depth}")
+                print(f"\n✅ BFS found solution at depth {depth}")
                 print(f"   Nodes: {nodes_expanded}, Fitness: {current_sched.calculate_fitness():.2f}")
                 return current_sched
         
@@ -62,7 +63,7 @@ def bfs_schedule(initial_schedule, max_depth=None):
         if not next_course:
             continue
         
-        # Generate all possible assignments for next course
+        # Generate all possible assignments
         for room in current_sched.rooms:
             if not room.can_accommodate(next_course):
                 continue
@@ -107,7 +108,7 @@ def bfs_schedule(initial_schedule, max_depth=None):
                             
                             queue.append((new_sched, depth + 1, new_path))
     
-    print(f"\n BFS exhausted search ({nodes_expanded} nodes)")
+    print(f"\n❌ BFS exhausted search ({nodes_expanded} nodes)")
     return None
 
 def create_state_id(schedule_obj):

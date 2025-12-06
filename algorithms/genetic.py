@@ -184,3 +184,44 @@ class genetic:
                         break
         
         return mutated
+    # In algorithms/genetic.py, update create_random_schedule():
+
+    def create_random_schedule(self):
+        """Create a random valid schedule WITH ASSIGNMENTS"""
+        new_schedule = self.schedule.copy()
+        
+        # Try to assign ALL courses
+        for course in new_schedule.courses:
+            # Find available rooms
+            available_rooms = [r for r in new_schedule.rooms 
+                            if r.can_accommodate(course)]
+            if not available_rooms:
+                continue
+            
+            # Find available professors
+            available_profs = [p for p in new_schedule.professors 
+                            if p.can_teach(course.course_id)]
+            if not available_profs:
+                continue
+            
+            # Try to find a valid time slot (MORE ATTEMPTS)
+            max_attempts = 200
+            assigned = False
+            
+            for _ in range(max_attempts):
+                room = random.choice(available_rooms)
+                prof = random.choice(available_profs)
+                day = random.choice(config.DAYS)
+                time_slot = random.randint(0, len(config.TIME_SLOTS) - 1)
+                
+                if (room.is_available(day, time_slot) and 
+                    prof.is_available(day, time_slot)):
+                    new_schedule.add_assignment(course, room, prof, day, time_slot)
+                    assigned = True
+                    break
+            
+            if not assigned:
+                # Couldn't assign this course - schedule is incomplete
+                pass  # We'll still use it but fitness will be lower
+        
+        return new_schedule

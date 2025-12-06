@@ -9,6 +9,16 @@ class csp:
         self.domains = {}    # Possible values for each course
         self.constraints = []
         self.solution = None
+
+        # In algorithms/csp.py, update is_goal() in A* and solve() in CSP:
+
+    def is_goal(self, schedule_obj):
+        """Check if ALL courses are scheduled"""
+        return all(c.assigned_time is not None for c in schedule_obj.courses)
+
+
+    
+
     
     def solve(self):
         """Solve using backtracking with constraint propagation"""
