@@ -64,7 +64,7 @@ class hill_climbing:
             
             print(f"  Restart best: {current_fitness:.2f}")
         
-        print(f"\n✅ Hill Climbing complete. Best fitness: {self.best_fitness:.2f}")
+        print(f"\n Hill Climbing complete. Best fitness: {self.best_fitness:.2f}")
         return self.best_schedule
     
     def generate_neighbors(self, schedule_obj):

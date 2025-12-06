@@ -1,14 +1,14 @@
-# main.py - UPDATED VERSION (DFS REMOVED)
+# main.py - Specialized Algorithm Interface
 import sys
 import os
+import time
 
 # Add fallback configuration if config.py doesn't exist
 try:
     import config
 except ImportError:
-    print(" config.py not found, using default configuration")
+    print("Warning: config.py not found, using default configuration")
     
-    # Create simple config module
     class SimpleConfig:
         ALGORITHM_CONFIG = {
             'csp': {'max_backtracks': 1000, 'timeout': 30},
@@ -23,457 +23,39 @@ except ImportError:
                      "13:00-14:30", "14:30-16:00", "16:00-17:30"]
         DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday"]
         FITNESS_WEIGHTS = {
-            'hard_constraint_violation': -1000,
+            'hard_constraint_violation': -10000,
+            'empty_schedule_penalty': -10000,
             'time_preference_bonus': 20,
+            'department_clustering_bonus': 25,
         }
     
     sys.modules['config'] = SimpleConfig()
     import config
 
-"""
-University Course Scheduling System - Main Entry Point
-"""
-
-import json
-import time
-from models import course, room, professor, schedule
+from models import schedule
 from algorithms import csp, genetic, a_star, hill_climbing, bfs, iterative_deepening, ucs
+from data_loader import load_from_json_file
 import config
-
-def load_sample_data():
-    """Create sample data for demonstration"""
-    print("Creating sample data...")
-    
-    # Create professors
-    prof1 = professor(
-        professor_id="prof001",
-        name="Dr. Alice Smith",
-        department="Computer Science",
-        courses=["cs101", "cs201", "cs301"],
-        max_hours=12,
-        preferences={
-            "preferred_days": ["monday", "wednesday", "friday"],
-            "preferred_times": ["morning"],
-        }
-    )
-    
-    prof2 = professor(
-        professor_id="prof002",
-        name="Dr. Bob Johnson",
-        department="Computer Science",
-        courses=["cs101", "cs202"],
-        max_hours=10,
-        preferences={
-            "preferred_days": ["tuesday", "thursday"],
-            "preferred_times": ["afternoon"],
-        }
-    )
-    
-    # Create rooms
-    room1 = room(
-        room_id="room101",
-        name="Science 101",
-        capacity=80,
-        room_type="lecture_hall",
-        features=["projector", "whiteboard"],
-        building="Science Building",
-        cost_per_hour=15.0
-    )
-    
-    room2 = room(
-        room_id="room202",
-        name="Science 202",
-        capacity=60,
-        room_type="lecture_hall",
-        features=["projector", "whiteboard", "sound_system"],
-        building="Science Building",
-        cost_per_hour=20.0
-    )
-    
-    room3 = room(
-        room_id="lab1",
-        name="Computer Lab 1",
-        capacity=40,
-        room_type="lab",
-        features=["computers", "projector"],
-        building="Engineering Building",
-        cost_per_hour=25.0
-    )
-    
-    # Create courses
-    courses_list = [
-        course(
-            course_id="cs101",
-            name="Introduction to Programming",
-            department="Computer Science",
-            credits=3,
-            students=60,
-            course_type="lecture",
-            professors=["prof001", "prof002"],
-            preferred_times=["morning"],
-            required_rooms=["projector"]
-        ),
-        course(
-            course_id="cs201",
-            name="Data Structures",
-            department="Computer Science",
-            credits=4,
-            students=45,
-            course_type="lecture",
-            professors=["prof001"],
-            prerequisites=["cs101"],
-            preferred_times=["morning", "afternoon"],
-            required_rooms=["projector"]
-        ),
-        course(
-            course_id="cs202",
-            name="Algorithms",
-            department="Computer Science",
-            credits=4,
-            students=35,
-            course_type="lecture",
-            professors=["prof002"],
-            prerequisites=["cs201"],
-            preferred_times=["afternoon"],
-            required_rooms=["projector"]
-        ),
-        course(
-            course_id="lab_cs101",
-            name="Programming Lab",
-            department="Computer Science",
-            credits=1,
-            students=20,
-            course_type="lab",
-            professors=["prof001", "prof002"],
-            required_rooms=["computers"]
-        )
-    ]
-    
-    return {
-        "courses": courses_list,
-        "rooms": [room1, room2, room3],
-        "professors": [prof1, prof2]
-    }
-
-def demonstrate_all_algorithms():
-    """Run and compare all algorithms"""
-    print("=" * 70)
-    print("UNIVERSITY COURSE SCHEDULING SYSTEM")
-    print("DEMONSTRATING ALL ALGORITHMS")
-    print("=" * 70)
-    
-    # Load data
-    data = load_sample_data()
-    
-    # Create initial empty schedule
-    initial_schedule = schedule(
-        courses=data["courses"],
-        rooms=data["rooms"],
-        professors=data["professors"]
-    )
-    
-    print(f"\n📊 Problem Size:")
-    print(f"  Courses: {len(initial_schedule.courses)}")
-    print(f"  Rooms: {len(initial_schedule.rooms)}")
-    print(f"  Professors: {len(initial_schedule.professors)}")
-    print(f"  Time slots per day: {len(config.TIME_SLOTS)}")
-    print(f"  Days: {len(config.DAYS)}")
-    
-    results = {}
-    
-    # 1. CSP Algorithm
-    print("\n" + "=" * 70)
-    print("1. CONSTRAINT SATISFACTION PROBLEM (CSP)")
-    print("=" * 70)
-    print("Purpose: Find any valid schedule satisfying all hard constraints")
-    print("Method: Backtracking with MRV, Degree, LCV heuristics")
-    print("Use case: Initial schedule generation")
-    
-    csp_solver = csp(initial_schedule)
-    start_time = time.time()
-    csp_result = csp_solver.solve()
-    csp_time = time.time() - start_time
-    
-    if csp_result:
-        results['CSP'] = {
-            'schedule': csp_result,
-            'time': csp_time,
-            'fitness': csp_result.calculate_fitness(),
-            'assignments': len(csp_result.assignments)
-        }
-    
-    # 2. Genetic Algorithm
-    print("\n" + "=" * 70)
-    print("2. GENETIC ALGORITHM")
-    print("=" * 70)
-    print("Purpose: Find high-quality schedule through evolution")
-    print("Method: Population-based search with crossover and mutation")
-    print("Use case: Generating multiple good alternatives")
-    
-    ga_solver = genetic(csp_result if csp_result else initial_schedule)
-    start_time = time.time()
-    ga_result = ga_solver.evolve(generations=200)  # Smaller for demo
-    ga_time = time.time() - start_time
-    
-    if ga_result:
-        results['Genetic'] = {
-            'schedule': ga_result,
-            'time': ga_time,
-            'fitness': ga_result.calculate_fitness(),
-            'assignments': len(ga_result.assignments)
-        }
-    
-    # 3. A* Search
-    print("\n" + "=" * 70)
-    print("3. A* SEARCH")
-    print("=" * 70)
-    print("Purpose: Find optimal schedule with heuristic guidance")
-    print("Method: Informed search with heuristic function")
-    print("Use case: When optimal solution is needed")
-    
-    astar_solver = a_star(initial_schedule)
-    start_time = time.time()
-    astar_result = astar_solver.find_path()
-    astar_time = time.time() - start_time
-    
-    if astar_result:
-        results['A*'] = {
-            'schedule': astar_result,
-            'time': astar_time,
-            'fitness': astar_result.calculate_fitness(),
-            'assignments': len(astar_result.assignments)
-        }
-    
-    # 4. Hill Climbing
-    print("\n" + "=" * 70)
-    print("4. HILL CLIMBING")
-    print("=" * 70)
-    print("Purpose: Local optimization of existing schedule")
-    print("Method: Local search with random restarts")
-    print("Use case: Incremental improvements")
-    
-    hc_solver = hill_climbing(ga_result if ga_result else csp_result if csp_result else initial_schedule)
-    start_time = time.time()
-    hc_result = hc_solver.optimize()
-    hc_time = time.time() - start_time
-    
-    if hc_result:
-        results['Hill Climbing'] = {
-            'schedule': hc_result,
-            'time': hc_time,
-            'fitness': hc_result.calculate_fitness(),
-            'assignments': len(hc_result.assignments)
-        }
-    
-    # 5. BFS
-    print("\n" + "=" * 70)
-    print("5. BREADTH-FIRST SEARCH (BFS)")
-    print("=" * 70)
-    print("Purpose: Guaranteed minimal-depth solution")
-    print("Method: Level-by-level exploration")
-    print("Use case: Emergency scheduling (minimal changes)")
-    
-    start_time = time.time()
-    bfs_result = bfs(initial_schedule, max_depth=5)  # Fixed function name
-    bfs_time = time.time() - start_time
-    
-    if bfs_result:
-        results['BFS'] = {
-            'schedule': bfs_result,
-            'time': bfs_time,
-            'fitness': bfs_result.calculate_fitness(),
-            'assignments': len(bfs_result.assignments)
-        }
-    
-    # 6. Iterative Deepening
-    print("\n" + "=" * 70)
-    print("6. ITERATIVE DEEPENING")
-    print("=" * 70)
-    print("Purpose: Combines BFS completeness with DFS memory efficiency")
-    print("Method: Repeated depth-limited search with increasing limits")
-    print("Use case: When unsure about solution depth")
-    
-    start_time = time.time()
-    id_result = iterative_deepening(initial_schedule, max_depth=5)  # Fixed function name
-    id_time = time.time() - start_time
-    
-    if id_result:
-        results['Iterative Deepening'] = {
-            'schedule': id_result,
-            'time': id_time,
-            'fitness': id_result.calculate_fitness(),
-            'assignments': len(id_result.assignments)
-        }
-    
-    # 7. Uniform Cost Search
-    print("\n" + "=" * 70)
-    print("7. UNIFORM COST SEARCH (UCS)")
-    print("=" * 70)
-    print("Purpose: Find minimum cost schedule")
-    print("Method: Cost-based priority queue")
-    print("Use case: Budget-constrained scheduling")
-    
-    ucs_solver = ucs(initial_schedule)
-    start_time = time.time()
-    ucs_result = ucs_solver.find_min_cost_schedule()
-    ucs_time = time.time() - start_time
-    
-    if ucs_result:
-        results['UCS'] = {
-            'schedule': ucs_result,
-            'time': ucs_time,
-            'fitness': ucs_result.calculate_fitness(),
-            'assignments': len(ucs_result.assignments)
-        }
-    
-    # Display results comparison
-    print("\n" + "=" * 70)
-    print("RESULTS COMPARISON")
-    print("=" * 70)
-    
-    if results:
-        print(f"\n{'Algorithm':<25} {'Time (s)':<10} {'Fitness':<10} {'Assignments':<12} {'Valid':<8}")
-        print("-" * 70)
-        
-        for algo, data in results.items():
-            print(f"{algo:<25} {data['time']:<10.2f} {data['fitness']:<10.2f} "
-                  f"{data['assignments']:<12} {data['schedule'].is_valid():<8}")
-        
-        # Find best schedule
-        best_algo = max(results.items(), key=lambda x: x[1]['fitness'])
-        print(f"\n🏆 BEST SCHEDULE: {best_algo[0]} (Fitness: {best_algo[1]['fitness']:.2f})")
-        
-        # Display best schedule
-        print("\n" + "=" * 70)
-        print("FINAL SCHEDULE")
-        print("=" * 70)
-        print(best_algo[1]['schedule'])
-        
-        # Save to file
-        save_schedule_to_file(best_algo[1]['schedule'])
-    else:
-        print("\n❌ No algorithms produced a valid schedule")
-    
-    print("\n" + "=" * 70)
-    print("ALGORITHM JUSTIFICATIONS")
-    print("=" * 70)
-    print("""
-1. CSP: Perfect for initial constraint validation - ensures all hard constraints are met
-2. Genetic Algorithm: Excellent for exploring solution space and generating alternatives
-3. A*: Optimal when good heuristics are available (walking distance, preferences)
-4. Hill Climbing: Efficient for local optimization of existing schedules
-5. BFS: Guarantees minimal changes - ideal for emergency scenarios
-6. Iterative Deepening: Complete search with memory efficiency - best of both worlds
-7. UCS: Essential for budget-conscious scheduling with cost optimization
-    """)
 
 def save_schedule_to_file(schedule_obj, filename="output/schedule.txt"):
     """Save schedule to file"""
-    import os
     os.makedirs("output", exist_ok=True)
     
     with open(filename, "w") as f:
         f.write(str(schedule_obj))
     
-    print(f"\n💾 Schedule saved to {filename}")
+    print(f"\nSchedule saved to {filename}")
 
-def emergency_scenario_demo():
-    """Demonstrate emergency scenario handling"""
+# ============================================================================
+# MODE 1: QUICK SCHEDULE (BFS)
+# ============================================================================
+def quick_schedule(data):
+    """Get any valid schedule fast using BFS"""
     print("\n" + "=" * 70)
-    print("EMERGENCY SCENARIO DEMONSTRATION")
+    print("QUICK SCHEDULE")
     print("=" * 70)
-    print("Scenario: Room 'Science 101' becomes unavailable suddenly")
+    print("Finding a valid schedule quickly...")
     
-    # Create a schedule first
-    data = load_sample_data()
-    initial_schedule = schedule(
-        courses=data["courses"],
-        rooms=data["rooms"],
-        professors=data["professors"]
-    )
-    
-    # Create a simple schedule
-    csp_solver = csp(initial_schedule)
-    current_schedule = csp_solver.solve()
-    
-    if current_schedule:
-        print("\nCurrent schedule (before emergency):")
-        print(f"  Fitness: {current_schedule.calculate_fitness():.2f}")
-        
-        # Simulate room outage
-        print("\n🚨 EMERGENCY: Room 'Science 101' is now unavailable!")
-        
-        # Remove assignments to that room
-        emergency_schedule = current_schedule.copy()
-        assignments_to_remove = []
-        
-        for assignment in emergency_schedule.assignments:
-            if assignment['room'].room_id == "room101":
-                assignments_to_remove.append(assignment)
-        
-        for assignment in assignments_to_remove:
-            emergency_schedule.remove_assignment(assignment)
-        
-        print(f"  {len(assignments_to_remove)} courses need rescheduling")
-        
-        # Use BFS for minimal changes
-        print("\nUsing BFS for minimal-change rescheduling...")
-        start_time = time.time()
-        new_schedule = bfs(emergency_schedule, max_depth=3)  # Fixed function name
-        rescue_time = time.time() - start_time
-        
-        if new_schedule:
-            print(f"  ✓ Rescheduled in {rescue_time:.2f} seconds")
-            print(f"  New fitness: {new_schedule.calculate_fitness():.2f}")
-            print(f"  Valid: {new_schedule.is_valid()}")
-        else:
-            print("  ✗ Could not reschedule with BFS")
-            
-            # Try Iterative Deepening as backup
-            print("\nTrying Iterative Deepening as backup...")
-            start_time = time.time()
-            new_schedule = iterative_deepening(emergency_schedule, max_depth=5)  # Fixed function name
-            rescue_time = time.time() - start_time
-            
-            if new_schedule:
-                print(f"  ✓ Rescheduled with Iterative Deepening in {rescue_time:.2f} seconds")
-
-def main():
-    """Main function"""
-    print("\n" + "=" * 70)
-    print("UNIVERSITY COURSE SCHEDULING SYSTEM")
-    print("=" * 70)
-    print("\nSelect mode:")
-    print("1. Run all algorithms comparison")
-    print("2. Emergency scenario demonstration")
-    print("3. Run specific algorithm")
-    
-    choice = input("\nEnter choice (1-3): ").strip()
-    
-    if choice == "1":
-        demonstrate_all_algorithms()
-    elif choice == "2":
-        emergency_scenario_demo()
-    elif choice == "3":
-        run_specific_algorithm()
-    else:
-        print("Invalid choice. Running default comparison...")
-        demonstrate_all_algorithms()
-
-def run_specific_algorithm():
-    """Run a specific algorithm"""
-    print("\nAvailable algorithms:")
-    print("1. CSP (Constraint Satisfaction)")
-    print("2. Genetic Algorithm")
-    print("3. A* Search")
-    print("4. Hill Climbing")
-    print("5. BFS")
-    print("6. Iterative Deepening")
-    print("7. Uniform Cost Search")
-    
-    choice = input("\nSelect algorithm (1-7): ").strip()
-    
-    data = load_sample_data()
     initial_schedule = schedule(
         courses=data["courses"],
         rooms=data["rooms"],
@@ -481,56 +63,364 @@ def run_specific_algorithm():
     )
     
     start_time = time.time()
-    
-    if choice == "1":
-        solver = csp(initial_schedule)
-        result = solver.solve()
-    elif choice == "2":
-        solver = genetic(initial_schedule)
-        result = solver.evolve(generations=100)
-    elif choice == "3":
-        solver = a_star(initial_schedule)
-        result = solver.find_path()
-    elif choice == "4":
-        solver = hill_climbing(initial_schedule)
-        result = solver.optimize()
-    elif choice == "5":
-        result = bfs(initial_schedule)  # Fixed function name
-    elif choice == "6":
-        result = iterative_deepening(initial_schedule)  # Fixed function name
-    elif choice == "7":
-        solver = ucs(initial_schedule)
-        result = solver.find_min_cost_schedule()
-    else:
-        print("Invalid choice")
-        return
-    
+    result = bfs(initial_schedule, max_depth=5)
     elapsed = time.time() - start_time
     
     if result:
-        print(f"\n✅ Algorithm completed in {elapsed:.2f} seconds")
-        print(f"   Fitness: {result.calculate_fitness():.2f}")
-        print(f"   Valid: {result.is_valid()}")
-        print(f"   Assignments: {len(result.assignments)}/{len(initial_schedule.courses)}")
-        print("\nSchedule:")
+        print(f"\n[OK] Schedule generated in {elapsed:.2f} seconds")
+        print(f"  Courses Scheduled: {len(result.assignments)}/{len(result.courses)}")
+        print(f"  Valid: {result.is_valid()}")
+        
+        print("\n" + "=" * 70)
+        print("SCHEDULE")
+        print("=" * 70)
         print(result)
+        
+        save_schedule_to_file(result)
     else:
-        print("❌ Algorithm failed to find solution")
+        print("\n[FAIL] Could not generate schedule")
 
-    # In config.py, update FITNESS_WEIGHTS:
+# ============================================================================
+# MODE 2: URGENT SCHEDULING (CSP)
+# ============================================================================
+def urgent_schedule(data):
+    """Emergency scheduling - fastest possible using CSP"""
+    print("\n" + "=" * 70)
+    print("URGENT SCHEDULING")
+    print("=" * 70)
+    print("EMERGENCY MODE - Finding fastest solution...")
+    
+    initial_schedule = schedule(
+        courses=data["courses"],
+        rooms=data["rooms"],
+        professors=data["professors"]
+    )
+    
+    csp_solver = csp(initial_schedule)
+    start_time = time.time()
+    result = csp_solver.solve()
+    elapsed = time.time() - start_time
+    
+    if result:
+        print(f"\n[OK] Emergency schedule generated in {elapsed:.2f} seconds")
+        print(f"  Courses Scheduled: {len(result.assignments)}/{len(result.courses)}")
+        print(f"  Valid: {result.is_valid()}")
+        print("\n  Note: This is an emergency schedule.")
+        print("     Consider using 'Optimize Preferences' for better quality.")
+        
+        print("\n" + "=" * 70)
+        print("SCHEDULE")
+        print("=" * 70)
+        print(result)
+        
+        save_schedule_to_file(result)
+    else:
+        print("\n[FAIL] Could not generate emergency schedule")
 
-    FITNESS_WEIGHTS = {
-        'hard_constraint_violation': -10000,
-        'empty_schedule_penalty': -10000,  # NEW
-        'incomplete_schedule_penalty': -500,  # NEW
-        'room_capacity_penalty': -50,
-        'professor_overload_penalty': -100,
-        'time_preference_bonus': 20,
-        'room_preference_bonus': 15,
-        'consecutive_classes_bonus': 10,
-        'department_clustering_bonus': 25,
-        'completion_bonus': 1000,  # NEW - bonus per assigned course
-    }
+# ============================================================================
+# MODE 3: OPTIMIZE PREFERENCES (GENETIC ALGORITHM)
+# ============================================================================
+def optimize_preferences(data):
+    """Find best quality schedule considering preferences using Genetic Algorithm"""
+    print("\n" + "=" * 70)
+    print("OPTIMIZE PREFERENCES")
+    print("=" * 70)
+    print("Finding high-quality schedule with preference optimization...")
+    
+    initial_schedule = schedule(
+        courses=data["courses"],
+        rooms=data["rooms"],
+        professors=data["professors"]
+    )
+    
+    ga_solver = genetic(initial_schedule)
+    start_time = time.time()
+    result = ga_solver.evolve(generations=200)
+    elapsed = time.time() - start_time
+    
+    if result:
+        pref_satisfaction = result.get_preference_satisfaction()
+        
+        print(f"\n[OK] Optimized schedule generated in {elapsed:.2f} seconds")
+        print(f"\nQuality Metrics:")
+        print(f"  Fitness Score: {result.calculate_fitness():.2f}")
+        print(f"  Preference Satisfaction: {pref_satisfaction:.1f}%")
+        print(f"  Courses Scheduled: {len(result.assignments)}/{len(result.courses)}")
+        print(f"  Valid: {result.is_valid()}")
+        
+        print("\n" + "=" * 70)
+        print("SCHEDULE")
+        print("=" * 70)
+        print(result)
+        
+        save_schedule_to_file(result)
+    else:
+        print("\n[FAIL] Could not optimize schedule")
+
+# ============================================================================
+# MODE 4: MINIMIZE COSTS (UCS)
+# ============================================================================
+def minimize_costs(data):
+    """Budget-conscious scheduling using UCS"""
+    print("\n" + "=" * 70)
+    print("MINIMIZE COSTS")
+    print("=" * 70)
+    print("Finding cost-optimized schedule...")
+    
+    initial_schedule = schedule(
+        courses=data["courses"],
+        rooms=data["rooms"],
+        professors=data["professors"]
+    )
+    
+    ucs_solver = ucs(initial_schedule)
+    start_time = time.time()
+    result = ucs_solver.find_min_cost_schedule()
+    elapsed = time.time() - start_time
+    
+    if result:
+        total_cost = result.calculate_total_cost()
+        cost_breakdown = result.get_cost_breakdown()
+        
+        print(f"\n[OK] Cost-optimized schedule generated in {elapsed:.2f} seconds")
+        print(f"\nCost Analysis:")
+        print(f"  Total Cost per Week: ${total_cost:.2f}")
+        print(f"  Annual Cost (30 weeks): ${total_cost * 30:.2f}")
+        
+        print(f"\n  Cost Breakdown by Room:")
+        for room_id, info in cost_breakdown.items():
+            print(f"    {info['room_name']}: ${info['total_cost']:.2f} ({info['count']} classes)")
+        
+        print(f"\n  Courses Scheduled: {len(result.assignments)}/{len(result.courses)}")
+        
+        print("\n" + "=" * 70)
+        print("SCHEDULE")
+        print("=" * 70)
+        print(result)
+        
+        save_schedule_to_file(result)
+    else:
+        print("\n[FAIL] Could not optimize for cost")
+
+# ============================================================================
+# MODE 5: MINIMIZE WALKING DISTANCE (A*)
+# ============================================================================
+def minimize_walking(data):
+    """Reduce student walking between classes using A*"""
+    print("\n" + "=" * 70)
+    print("MINIMIZE WALKING DISTANCE")
+    print("=" * 70)
+    print("Optimizing schedule to reduce student walking...")
+    
+    initial_schedule = schedule(
+        courses=data["courses"],
+        rooms=data["rooms"],
+        professors=data["professors"]
+    )
+    
+    astar_solver = a_star(initial_schedule)
+    start_time = time.time()
+    result = astar_solver.find_path()
+    elapsed = time.time() - start_time
+    
+    if result:
+        walking_score = result.calculate_walking_distance()
+        transitions = result.get_building_transitions()
+        
+        print(f"\n[OK] Schedule optimized in {elapsed:.2f} seconds")
+        print(f"\nWalking Distance Metrics:")
+        print(f"  Total Distance Score: {walking_score} meters")
+        print(f"  Building Transitions: {sum(len(t) for t in transitions.values())}")
+        
+        if transitions:
+            print(f"\n  Transitions by Day:")
+            for day, trans in transitions.items():
+                print(f"    {day.capitalize()}: {len(trans)} transitions")
+        else:
+            print(f"\n  [OK] No building transitions - all classes in same building!")
+        
+        print(f"\n  Courses Scheduled: {len(result.assignments)}/{len(result.courses)}")
+        
+        print("\n" + "=" * 70)
+        print("SCHEDULE")
+        print("=" * 70)
+        print(result)
+        
+        save_schedule_to_file(result)
+    else:
+        print("\n[FAIL] Could not optimize for walking distance")
+
+# ============================================================================
+# MODE 6: IMPROVE EXISTING SCHEDULE (HILL CLIMBING)
+# ============================================================================
+def improve_schedule(data):
+    """Incrementally improve an existing schedule using Hill Climbing"""
+    print("\n" + "=" * 70)
+    print("IMPROVE EXISTING SCHEDULE")
+    print("=" * 70)
+    
+    print("\nGenerating baseline schedule with CSP...")
+    initial = schedule(
+        courses=data["courses"],
+        rooms=data["rooms"],
+        professors=data["professors"]
+    )
+    csp_solver = csp(initial)
+    previous = csp_solver.solve()
+    
+    if previous:
+        print(f"  Baseline Fitness: {previous.calculate_fitness():.2f}")
+        
+        print("\nImproving schedule with Hill Climbing...")
+        hc_solver = hill_climbing(previous)
+        start_time = time.time()
+        result = hc_solver.optimize()
+        elapsed = time.time() - start_time
+        
+        if result:
+            comparison = result.compare_to(previous)
+            
+            print(f"\n[OK] Schedule improved in {elapsed:.2f} seconds")
+            print(f"\nImprovements:")
+            print(f"  Fitness: {previous.calculate_fitness():.2f} -> {result.calculate_fitness():.2f}")
+            print(f"  Change: {comparison['fitness_change']:+.2f}")
+            print(f"  Assignments Changed: {comparison['assignments_changed']}")
+            
+            if comparison['improvements']:
+                print(f"\n  Details:")
+                for improvement in comparison['improvements']:
+                    print(f"    - {improvement}")
+            
+            print("\n" + "=" * 70)
+            print("IMPROVED SCHEDULE")
+            print("=" * 70)
+            print(result)
+            
+            save_schedule_to_file(result)
+        else:
+            print("\n[FAIL] Could not improve schedule")
+    else:
+        print("\n[FAIL] Could not generate baseline schedule")
+
+# ============================================================================
+# MODE 7: LARGE DATASET SCHEDULING (ITERATIVE DEEPENING)
+# ============================================================================
+def large_dataset_schedule(data):
+    """Handle large scheduling problems efficiently using Iterative Deepening"""
+    print("\n" + "=" * 70)
+    print("LARGE DATASET SCHEDULING")
+    print("=" * 70)
+    
+    num_courses = len(data["courses"])
+    print(f"\nScheduling {num_courses} courses with memory-efficient algorithm...")
+    
+    initial_schedule = schedule(
+        courses=data["courses"],
+        rooms=data["rooms"],
+        professors=data["professors"]
+    )
+    
+    start_time = time.time()
+    result = iterative_deepening(initial_schedule, max_depth=10)
+    elapsed = time.time() - start_time
+    
+    if result:
+        print(f"\n[OK] Schedule generated in {elapsed:.2f} seconds")
+        print(f"\nPerformance Metrics:")
+        print(f"  Courses Scheduled: {len(result.assignments)}/{num_courses}")
+        print(f"  Memory Efficient: Yes")
+        print(f"  Suitable for Large Datasets: Yes")
+        
+        print("\n" + "=" * 70)
+        print("SCHEDULE")
+        print("=" * 70)
+        print(result)
+        
+        save_schedule_to_file(result)
+    else:
+        print("\n[FAIL] Could not generate schedule")
+
+# ============================================================================
+# MAIN FUNCTION
+# ============================================================================
+def main():
+    """Main function with specialized scheduling modes"""
+    print("\n" + "=" * 70)
+    print("UNIVERSITY COURSE SCHEDULING SYSTEM")
+    print("=" * 70)
+    
+    # Automatically load university data
+    print("\nLoading university data...")
+    try:
+        data = load_from_json_file("university_data.json")
+        print(f"[OK] Loaded {len(data['courses'])} courses, {len(data['rooms'])} rooms, {len(data['professors'])} professors")
+    except FileNotFoundError:
+        print("\n[FAIL] Error: university_data.json not found!")
+        print("   Please ensure the file exists in the project directory.")
+        return
+    except Exception as e:
+        print(f"\n[FAIL] Error loading data: {e}")
+        return
+    
+    # Main loop - keep running until user exits
+    while True:
+        print("\n" + "=" * 70)
+        print("SCHEDULING MODE")
+        print("=" * 70)
+        print("What would you like to do?\n")
+        print("1. Quick Schedule")
+        print("   -> Get any valid schedule fast")
+        print("   -> Best for: Initial scheduling, testing\n")
+        
+        print("2. Urgent Scheduling")
+        print("   -> Emergency scheduling, fastest possible")
+        print("   -> Best for: Last-minute changes, room unavailable\n")
+        
+        print("3. Optimize Preferences")
+        print("   -> Best quality schedule considering preferences")
+        print("   -> Best for: Maximizing professor/student satisfaction\n")
+        
+        print("4. Minimize Costs")
+        print("   -> Budget-conscious scheduling")
+        print("   -> Best for: Cost reduction, budget constraints\n")
+        
+        print("5. Minimize Walking Distance")
+        print("   -> Reduce student walking between classes")
+        print("   -> Best for: Large campus, student complaints\n")
+        
+        print("6. Improve Existing Schedule")
+        print("   -> Refine and improve schedule quality")
+        print("   -> Best for: Incremental improvements\n")
+        
+        print("7. Large Dataset Scheduling")
+        print("   -> Memory-efficient scheduling")
+        print("   -> Best for: Any dataset size\n")
+        
+        print("x. Exit")
+        
+        choice = input("\nEnter choice (1-7 or x to exit): ").strip().lower()
+        
+        if choice == "x":
+            print("\n" + "=" * 70)
+            print("Thank you for using the University Course Scheduling System!")
+            print("=" * 70)
+            break
+        elif choice == "1":
+            quick_schedule(data)
+        elif choice == "2":
+            urgent_schedule(data)
+        elif choice == "3":
+            optimize_preferences(data)
+        elif choice == "4":
+            minimize_costs(data)
+        elif choice == "5":
+            minimize_walking(data)
+        elif choice == "6":
+            improve_schedule(data)
+        elif choice == "7":
+            large_dataset_schedule(data)
+        else:
+            print("\n  [FAIL] Invalid choice. Please enter 1-7 or x")
 
 if __name__ == "__main__":
     main()

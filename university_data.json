@@ -1,0 +1,242 @@
+{
+    "professors": [
+        {
+            "professor_id": "prof001",
+            "name": "Dr. Alice Smith",
+            "department": "Computer Science",
+            "courses": [
+                "cs101",
+                "cs301"
+            ],
+            "max_hours": 12,
+            "preferences": {
+                "preferred_days": [
+                    "monday"
+                ],
+                "preferred_times": [
+                    "morning"
+                ]
+            }
+        },
+        {
+            "professor_id": "prof002",
+            "name": "Dr. Bob Johnson",
+            "department": "Computer Science",
+            "courses": [
+                "cs102",
+                "cs202"
+            ],
+            "max_hours": 12,
+            "preferences": {
+                "preferred_days": [
+                    "tuesday"
+                ],
+                "preferred_times": [
+                    "afternoon"
+                ]
+            }
+        },
+        {
+            "professor_id": "prof003",
+            "name": "Dr. Carol Williams",
+            "department": "Computer Science",
+            "courses": [
+                "cs201"
+            ],
+            "max_hours": 12,
+            "preferences": {
+                "preferred_days": [
+                    "wednesday"
+                ],
+                "preferred_times": [
+                    "morning"
+                ]
+            }
+        },
+        {
+            "professor_id": "prof004",
+            "name": "Dr. David Brown",
+            "department": "Computer Science",
+            "courses": [
+                "cs102",
+                "cs301"
+            ],
+            "max_hours": 12,
+            "preferences": {
+                "preferred_days": [
+                    "thursday"
+                ],
+                "preferred_times": [
+                    "afternoon"
+                ]
+            }
+        }
+    ],
+    "rooms": [
+        {
+            "room_id": "room101",
+            "name": "CS Building Room 101",
+            "capacity": 80,
+            "room_type": "lecture_hall",
+            "features": [
+                "projector",
+                "whiteboard"
+            ],
+            "building": "Computer Science Building",
+            "cost_per_hour": 15.0
+        },
+        {
+            "room_id": "room102",
+            "name": "CS Building Room 102",
+            "capacity": 60,
+            "room_type": "lecture_hall",
+            "features": [
+                "projector",
+                "whiteboard"
+            ],
+            "building": "Computer Science Building",
+            "cost_per_hour": 20.0
+        },
+        {
+            "room_id": "room103",
+            "name": "CS Building Room 103",
+            "capacity": 50,
+            "room_type": "lecture_hall",
+            "features": [
+                "projector",
+                "whiteboard"
+            ],
+            "building": "Computer Science Building",
+            "cost_per_hour": 12.0
+        },
+        {
+            "room_id": "room201",
+            "name": "CS Building Room 201",
+            "capacity": 45,
+            "room_type": "lecture_hall",
+            "features": [
+                "projector"
+            ],
+            "building": "Computer Science Building",
+            "cost_per_hour": 18.0
+        },
+        {
+            "room_id": "lab301",
+            "name": "CS Building Lab 301",
+            "capacity": 40,
+            "room_type": "lab",
+            "features": [
+                "computers",
+                "projector"
+            ],
+            "building": "Computer Science Building",
+            "cost_per_hour": 25.0
+        },
+        {
+            "room_id": "lab302",
+            "name": "CS Building Lab 302",
+            "capacity": 35,
+            "room_type": "lab",
+            "features": [
+                "computers",
+                "projector"
+            ],
+            "building": "Computer Science Building",
+            "cost_per_hour": 22.0
+        }
+    ],
+    "courses": [
+        {
+            "course_id": "cs101",
+            "name": "Introduction to Programming",
+            "department": "Computer Science",
+            "credits": 3,
+            "students": 60,
+            "course_type": "lecture",
+            "professors": [
+                "prof001"
+            ],
+            "prerequisites": [],
+            "preferred_times": [
+                "morning"
+            ],
+            "required_rooms": [
+                "projector"
+            ]
+        },
+        {
+            "course_id": "cs102",
+            "name": "Data Structures",
+            "department": "Computer Science",
+            "credits": 3,
+            "students": 45,
+            "course_type": "lecture",
+            "professors": [
+                "prof002",
+                "prof004"
+            ],
+            "prerequisites": [],
+            "preferred_times": [
+                "afternoon"
+            ],
+            "required_rooms": [
+                "projector"
+            ]
+        },
+        {
+            "course_id": "cs201",
+            "name": "Algorithms",
+            "department": "Computer Science",
+            "credits": 3,
+            "students": 40,
+            "course_type": "lecture",
+            "professors": [
+                "prof003"
+            ],
+            "prerequisites": [],
+            "preferred_times": [
+                "morning"
+            ],
+            "required_rooms": [
+                "projector"
+            ]
+        },
+        {
+            "course_id": "cs202",
+            "name": "Database Systems",
+            "department": "Computer Science",
+            "credits": 3,
+            "students": 35,
+            "course_type": "lecture",
+            "professors": [
+                "prof002"
+            ],
+            "prerequisites": [],
+            "preferred_times": [
+                "afternoon"
+            ],
+            "required_rooms": [
+                "projector"
+            ]
+        },
+        {
+            "course_id": "cs301",
+            "name": "Software Engineering",
+            "department": "Computer Science",
+            "credits": 3,
+            "students": 30,
+            "course_type": "lecture",
+            "professors": [
+                "prof001",
+                "prof004"
+            ],
+            "prerequisites": [],
+            "preferred_times": [
+                "morning"
+            ],
+            "required_rooms": [
+                "projector"
+            ]
+        }
+    ]
+}

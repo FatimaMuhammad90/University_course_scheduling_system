@@ -42,11 +42,11 @@ def iterative_deepening(initial_schedule, max_depth=None):
         # Run depth-limited search
         result = depth_limited_search(initial_schedule, depth)
         if result:
-            print(f"✅ Found solution at depth {depth}")
+            print(f"Found solution at depth {depth}")
             print(f"   Fitness: {result.calculate_fitness():.2f}")
             return result
     
-    print("❌ Iterative Deepening could not find solution within depth limit")
+    print(" Iterative Deepening could not find solution within depth limit")
     return None
 
 def depth_limited_search(initial_schedule, depth_limit):
@@ -181,10 +181,10 @@ def depth_limited_search(initial_schedule, depth_limit):
     result = dls_recursive(initial_schedule.copy(), 0, [])
     
     if result:
-        print(f"\n✅ Depth-limited search found solution at depth {depth_limit}")
+        print(f"\nDepth-limited search found solution at depth {depth_limit}")
         print(f"   Nodes expanded: {nodes_expanded}")
     else:
-        print(f"\n❌ No solution found within depth {depth_limit} ({nodes_expanded} nodes)")
+        print(f"\ No solution found within depth {depth_limit} ({nodes_expanded} nodes)")
     
     return result
 

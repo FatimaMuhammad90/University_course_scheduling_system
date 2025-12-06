@@ -39,7 +39,7 @@ class ucs:
             # Check if complete
             if len(assignments) == len(current_sched.courses):
                 if current_sched.is_valid():
-                    print(f"\n✅ UCS found minimum cost solution")
+                    print(f"\nUCS found minimum cost solution")
                     print(f"   Cost: {current_cost:.2f}, Nodes: {nodes_expanded}")
                     print(f"   Fitness: {current_sched.calculate_fitness():.2f}")
                     return current_sched

@@ -165,6 +165,140 @@ class schedule:
         self.fitness = score
         return score
     
+    def calculate_total_cost(self):
+        """Calculate total room rental cost per week"""
+        total = 0
+        for assignment in self.assignments:
+            # Each class is 1.5 hours
+            total += assignment['room'].cost_per_hour * 1.5
+        return total
+    
+    def get_cost_breakdown(self):
+        """Get cost breakdown by room"""
+        breakdown = {}
+        for assignment in self.assignments:
+            room_id = assignment['room'].room_id
+            cost = assignment['room'].cost_per_hour * 1.5
+            if room_id not in breakdown:
+                breakdown[room_id] = {
+                    'room_name': assignment['room'].name,
+                    'count': 0,
+                    'total_cost': 0
+                }
+            breakdown[room_id]['count'] += 1
+            breakdown[room_id]['total_cost'] += cost
+        return breakdown
+    
+    def calculate_walking_distance(self):
+        """Calculate walking distance score based on building transitions"""
+        # Building distance map (in meters)
+        building_distances = {
+            ('Science Building', 'Engineering Building'): 200,
+            ('Engineering Building', 'Science Building'): 200,
+            ('Science Building', 'Arts Building'): 150,
+            ('Arts Building', 'Science Building'): 150,
+            ('Engineering Building', 'Arts Building'): 250,
+            ('Arts Building', 'Engineering Building'): 250,
+        }
+        
+        total_distance = 0
+        transitions = self.get_building_transitions()
+        
+        for day, day_transitions in transitions.items():
+            for trans in day_transitions:
+                distance = building_distances.get((trans['from'], trans['to']), 100)
+                total_distance += distance
+        
+        return total_distance
+    
+    def get_building_transitions(self):
+        """Get building transitions students must make each day"""
+        transitions = {}
+        
+        # Group assignments by day
+        for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
+            day_assignments = sorted(
+                [a for a in self.assignments if a['day'] == day],
+                key=lambda x: x['time_slot']
+            )
+            
+            day_transitions = []
+            for i in range(len(day_assignments) - 1):
+                curr_building = day_assignments[i]['room'].building
+                next_building = day_assignments[i+1]['room'].building
+                
+                if curr_building != next_building:
+                    day_transitions.append({
+                        'from': curr_building,
+                        'to': next_building,
+                        'time': day_assignments[i]['time_slot']
+                    })
+            
+            if day_transitions:
+                transitions[day] = day_transitions
+        
+        return transitions
+    
+    def get_preference_satisfaction(self):
+        """Calculate percentage of preferences satisfied"""
+        if not self.assignments:
+            return 0.0
+        
+        satisfied = 0
+        total = 0
+        
+        for assignment in self.assignments:
+            prof = assignment['professor']
+            day = assignment['day']
+            time_slot = assignment['time_slot']
+            
+            # Check day preference
+            if 'preferred_days' in prof.preferences:
+                total += 1
+                if day in prof.preferences['preferred_days']:
+                    satisfied += 1
+            
+            # Check time preference
+            if 'preferred_times' in prof.preferences:
+                total += 1
+                time_of_day = "morning" if time_slot <= 2 else "afternoon"
+                if time_of_day in prof.preferences['preferred_times']:
+                    satisfied += 1
+        
+        return (satisfied / total * 100) if total > 0 else 0.0
+    
+    def compare_to(self, other_schedule):
+        """Compare this schedule to another (for Hill Climbing)"""
+        improvements = {
+            'fitness_change': self.fitness - other_schedule.fitness,
+            'assignments_changed': 0,
+            'improvements': []
+        }
+        
+        # Count changed assignments
+        for assignment in self.assignments:
+            course_id = assignment['course_id']
+            # Find same course in other schedule
+            other_assign = next(
+                (a for a in other_schedule.assignments if a['course_id'] == course_id),
+                None
+            )
+            if other_assign:
+                if (assignment['room_id'] != other_assign['room_id'] or
+                    assignment['day'] != other_assign['day'] or
+                    assignment['time_slot'] != other_assign['time_slot']):
+                    improvements['assignments_changed'] += 1
+        
+        # Identify improvements
+        if improvements['fitness_change'] > 0:
+            improvements['improvements'].append(f"Fitness improved by {improvements['fitness_change']:.2f}")
+        
+        pref_change = self.get_preference_satisfaction() - other_schedule.get_preference_satisfaction()
+        if pref_change > 0:
+            improvements['improvements'].append(f"Preference satisfaction improved by {pref_change:.1f}%")
+        
+        return improvements
+    
     def __str__(self):
         output = "=" * 60 + "\n"
         output += "COURSE SCHEDULE\n"
