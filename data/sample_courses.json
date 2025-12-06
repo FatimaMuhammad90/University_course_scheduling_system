@@ -1,0 +1,79 @@
+{
+    "courses": [
+      {
+        "course_id": "cs101",
+        "name": "Introduction to Programming",
+        "department": "Computer Science",
+        "credits": 3,
+        "students": 65,
+        "course_type": "lecture",
+        "professors": ["prof001", "prof002"],
+        "prerequisites": [],
+        "preferred_times": ["morning"],
+        "required_rooms": ["projector"],
+        "duration": 1.5
+      },
+      {
+        "course_id": "cs201",
+        "name": "Data Structures",
+        "department": "Computer Science",
+        "credits": 4,
+        "students": 45,
+        "course_type": "lecture",
+        "professors": ["prof001"],
+        "prerequisites": ["cs101"],
+        "preferred_times": ["morning", "afternoon"],
+        "required_rooms": ["projector", "whiteboard"],
+        "duration": 1.5
+      },
+      {
+        "course_id": "cs202",
+        "name": "Algorithms",
+        "department": "Computer Science",
+        "credits": 4,
+        "students": 38,
+        "course_type": "lecture",
+        "professors": ["prof002"],
+        "prerequisites": ["cs201"],
+        "preferred_times": ["afternoon"],
+        "required_rooms": ["projector"],
+        "duration": 1.5
+      },
+      {
+        "course_id": "lab_cs101",
+        "name": "Programming Lab",
+        "department": "Computer Science",
+        "credits": 1,
+        "students": 20,
+        "course_type": "lab",
+        "professors": ["prof001", "prof002"],
+        "prerequisites": [],
+        "required_rooms": ["computers", "lab_equipment"],
+        "duration": 2.0
+      },
+      {
+        "course_id": "math101",
+        "name": "Calculus I",
+        "department": "Mathematics",
+        "credits": 4,
+        "students": 120,
+        "course_type": "lecture",
+        "professors": ["prof003"],
+        "prerequisites": [],
+        "preferred_times": ["morning"],
+        "duration": 1.5
+      },
+      {
+        "course_id": "ee101",
+        "name": "Introduction to Electrical Engineering",
+        "department": "Electrical Engineering",
+        "credits": 3,
+        "students": 55,
+        "course_type": "lecture",
+        "professors": ["prof004"],
+        "prerequisites": [],
+        "required_rooms": ["projector", "whiteboard"],
+        "duration": 1.5
+      }
+    ]
+  }

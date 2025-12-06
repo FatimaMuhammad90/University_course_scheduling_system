@@ -1,5 +1,5 @@
 import copy
-class Schedule:
+class schedule:
     def __init__(self, courses=None, rooms=None, professors=None):
         self.courses = courses or []
         self.rooms = rooms or []
@@ -174,7 +174,7 @@ class Schedule:
     
     def copy(self):
    
-        new_schedule = Schedule(
+        new_schedule = schedule(
             courses=copy.deepcopy(self.courses),
             rooms=copy.deepcopy(self.rooms),
             professors=copy.deepcopy(self.professors)

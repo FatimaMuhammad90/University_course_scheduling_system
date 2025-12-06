@@ -1,0 +1,67 @@
+{
+    "rooms": [
+      {
+        "room_id": "room101",
+        "name": "Science Building 101",
+        "capacity": 80,
+        "room_type": "lecture_hall",
+        "features": ["projector", "whiteboard", "microphone"],
+        "building": "Science Building",
+        "floor": 1,
+        "cost_per_hour": 15.0
+      },
+      {
+        "room_id": "room202",
+        "name": "Science Building 202",
+        "capacity": 120,
+        "room_type": "lecture_hall",
+        "features": ["projector", "whiteboard", "sound_system", "recording"],
+        "building": "Science Building",
+        "floor": 2,
+        "cost_per_hour": 25.0
+      },
+      {
+        "room_id": "lab1",
+        "name": "Computer Lab 1",
+        "capacity": 40,
+        "room_type": "lab",
+        "features": ["computers", "projector", "whiteboard", "network", "lab_equipment"],
+        "building": "Engineering Building",
+        "floor": 1,
+        "cost_per_hour": 20.0,
+        "maintenance_schedule": {
+          "wednesday": ["8:00-9:30", "9:30-11:00"]
+        }
+      },
+      {
+        "room_id": "room303",
+        "name": "Small Seminar Room",
+        "capacity": 25,
+        "room_type": "seminar",
+        "features": ["whiteboard", "tv"],
+        "building": "Main Building",
+        "floor": 3,
+        "cost_per_hour": 8.0
+      },
+      {
+        "room_id": "auditorium",
+        "name": "Main Auditorium",
+        "capacity": 300,
+        "room_type": "auditorium",
+        "features": ["projector", "sound_system", "stage", "recording", "microphone"],
+        "building": "Main Building",
+        "floor": 1,
+        "cost_per_hour": 50.0
+      },
+      {
+        "room_id": "lab2",
+        "name": "Electrical Lab",
+        "capacity": 30,
+        "room_type": "lab",
+        "features": ["lab_equipment", "computers", "whiteboard"],
+        "building": "Engineering Building",
+        "floor": 2,
+        "cost_per_hour": 18.0
+      }
+    ]
+  }
