@@ -95,43 +95,29 @@ class schedule:
         return violations == 0
     
     def calculate_fitness(self):
-        """
-        Calculate fitness score for the schedule.
-        CRITICAL: Empty schedules get very negative scores to prevent algorithms
-        from finding "solutions" with zero assignments.
-        """
-        # Invalid schedules get the worst score
         if not self.is_valid():
             self.fitness = config.FITNESS_WEIGHTS['hard_constraint_violation']
             return self.fitness
         
-        # START WITH NEGATIVE BASE SCORE
-        # This ensures that only schedules with actual assignments get positive scores
         score = -1000
         
-        # HEAVY PENALTY FOR INCOMPLETE SCHEDULE
         scheduled_courses = len(self.assignments)
         total_courses = len(self.courses)
         
         if scheduled_courses == 0:
-            # EMPTY SCHEDULE GETS VERY LOW SCORE
             self.fitness = config.FITNESS_WEIGHTS['empty_schedule_penalty']
             return self.fitness
-        
-        # BONUS FOR COMPLETENESS
-        # This is the main way to get a positive score - by actually scheduling courses
+
         completion_ratio = scheduled_courses / total_courses
-        score += completion_ratio * 2000  # Big bonus for complete schedules
+        score += completion_ratio * 2000 
         
-        # Additional bonuses for quality assignments
         for assignment in self.assignments:
             course = assignment['course']
             room = assignment['room']
             prof = assignment['professor']
             day = assignment['day']
             time_slot = assignment['time_slot']
-            
-            # Room capacity fitness
+    
             utilization = course.students / room.capacity
             if utilization > 0.8:
                 score += 20
@@ -140,16 +126,13 @@ class schedule:
             elif utilization < 0.3:
                 score -= 10  # Penalize underutilization
             
-            # Professor preferences
             pref_score = prof.get_preference_score(day, time_slot)
             score += pref_score * 10
             
-            # Course time preferences
             time_of_day = "morning" if time_slot <= 2 else "afternoon"
             if time_of_day in course.preferred_times:
                 score += config.FITNESS_WEIGHTS['time_preference_bonus']
-        
-        # Department clustering bonus
+        # agar aik dept mein hon tou walking distance kam hoga
         dept_assignments = {}
         for assignment in self.assignments:
             dept = assignment['course'].department
@@ -164,17 +147,14 @@ class schedule:
         
         self.fitness = score
         return score
-    
+    # ucs cost checker
     def calculate_total_cost(self):
-        """Calculate total room rental cost per week"""
         total = 0
         for assignment in self.assignments:
-            # Each class is 1.5 hours
             total += assignment['room'].cost_per_hour * 1.5
         return total
     
     def get_cost_breakdown(self):
-        """Get cost breakdown by room"""
         breakdown = {}
         for assignment in self.assignments:
             room_id = assignment['room'].room_id
@@ -190,8 +170,7 @@ class schedule:
         return breakdown
     
     def calculate_walking_distance(self):
-        """Calculate walking distance score based on building transitions"""
-        # Building distance map (in meters)
+        # Building distance map 
         building_distances = {
             ('Science Building', 'Engineering Building'): 200,
             ('Engineering Building', 'Science Building'): 200,
@@ -289,7 +268,6 @@ class schedule:
                     assignment['time_slot'] != other_assign['time_slot']):
                     improvements['assignments_changed'] += 1
         
-        # Identify improvements
         if improvements['fitness_change'] > 0:
             improvements['improvements'].append(f"Fitness improved by {improvements['fitness_change']:.2f}")
         
@@ -304,7 +282,6 @@ class schedule:
         output += "COURSE SCHEDULE\n"
         output += "=" * 60 + "\n"
         
-        # Group by day - FIX: use lowercase for comparison since assignments store lowercase days
         days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
         days_display = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
         time_slots = ["8:00-9:30", "9:30-11:00", "11:00-12:30", 
@@ -337,16 +314,12 @@ class schedule:
         return output
     
     def copy(self):
-        """Create a deep copy of the schedule"""
         new_schedule = schedule(
             courses=copy.deepcopy(self.courses),
             rooms=copy.deepcopy(self.rooms),
             professors=copy.deepcopy(self.professors)
         )
-        
-        # Recreate assignments
         for assignment in self.assignments:
-            # Find corresponding objects in copied lists
             course = next(c for c in new_schedule.courses if c.course_id == assignment['course_id'])
             room = next(r for r in new_schedule.rooms if r.room_id == assignment['room_id'])
             professor = next(p for p in new_schedule.professors if p.professor_id == assignment['professor_id'])

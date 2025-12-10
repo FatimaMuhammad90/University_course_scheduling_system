@@ -2,53 +2,21 @@
 import sys
 import os
 import time
-
-# Add fallback configuration if config.py doesn't exist
-try:
-    import config
-except ImportError:
-    print("Warning: config.py not found, using default configuration")
-    
-    class SimpleConfig:
-        ALGORITHM_CONFIG = {
-            'csp': {'max_backtracks': 1000, 'timeout': 30},
-            'genetic': {'population_size': 50, 'generations': 200},
-            'a_star': {},
-            'hill_climbing': {'max_iterations': 500},
-            'bfs': {'max_depth': 5, 'max_nodes': 2000},
-            'iterative_deepening': {'max_depth': 5},
-            'ucs': {}
-        }
-        TIME_SLOTS = ["8:00-9:30", "9:30-11:00", "11:00-12:30", 
-                     "13:00-14:30", "14:30-16:00", "16:00-17:30"]
-        DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday"]
-        FITNESS_WEIGHTS = {
-            'hard_constraint_violation': -10000,
-            'empty_schedule_penalty': -10000,
-            'time_preference_bonus': 20,
-            'department_clustering_bonus': 25,
-        }
-    
-    sys.modules['config'] = SimpleConfig()
-    import config
-
+import config
 from models import schedule
 from algorithms import csp, genetic, a_star, hill_climbing, bfs, iterative_deepening, ucs
 from data_loader import load_from_json_file
 import config
 
-def save_schedule_to_file(schedule_obj, filename="output/schedule.txt"):
-    """Save schedule to file"""
-    os.makedirs("output", exist_ok=True)
-    
+def save_schedule_to_file(schedule_obj, filename="output/schedule.txt"):    
     with open(filename, "w") as f:
         f.write(str(schedule_obj))
     
     print(f"\nSchedule saved to {filename}")
 
-# ============================================================================
-# MODE 1: QUICK SCHEDULE (BFS)
-# ============================================================================
+
+# BFS
+
 def quick_schedule(data):
     """Get any valid schedule fast using BFS"""
     print("\n" + "=" * 70)
@@ -80,9 +48,8 @@ def quick_schedule(data):
     else:
         print("\n[FAIL] Could not generate schedule")
 
-# ============================================================================
 # MODE 2: URGENT SCHEDULING (CSP)
-# ============================================================================
+
 def urgent_schedule(data):
     """Emergency scheduling - fastest possible using CSP"""
     print("\n" + "=" * 70)
@@ -117,9 +84,8 @@ def urgent_schedule(data):
     else:
         print("\n[FAIL] Could not generate emergency schedule")
 
-# ============================================================================
-# MODE 3: OPTIMIZE PREFERENCES (GENETIC ALGORITHM)
-# ============================================================================
+# GENETIC ALGORITHM
+
 def optimize_preferences(data):
     """Find best quality schedule considering preferences using Genetic Algorithm"""
     print("\n" + "=" * 70)
@@ -157,9 +123,8 @@ def optimize_preferences(data):
     else:
         print("\n[FAIL] Could not optimize schedule")
 
-# ============================================================================
-# MODE 4: MINIMIZE COSTS (UCS)
-# ============================================================================
+
+# UCS
 def minimize_costs(data):
     """Budget-conscious scheduling using UCS"""
     print("\n" + "=" * 70)
@@ -202,9 +167,9 @@ def minimize_costs(data):
     else:
         print("\n[FAIL] Could not optimize for cost")
 
-# ============================================================================
-# MODE 5: MINIMIZE WALKING DISTANCE (A*)
-# ============================================================================
+
+# A*
+
 def minimize_walking(data):
     """Reduce student walking between classes using A*"""
     print("\n" + "=" * 70)
@@ -250,9 +215,7 @@ def minimize_walking(data):
     else:
         print("\n[FAIL] Could not optimize for walking distance")
 
-# ============================================================================
-# MODE 6: IMPROVE EXISTING SCHEDULE (HILL CLIMBING)
-# ============================================================================
+# HILL CLIMBING
 def improve_schedule(data):
     """Incrementally improve an existing schedule using Hill Climbing"""
     print("\n" + "=" * 70)
@@ -302,9 +265,8 @@ def improve_schedule(data):
     else:
         print("\n[FAIL] Could not generate baseline schedule")
 
-# ============================================================================
-# MODE 7: LARGE DATASET SCHEDULING (ITERATIVE DEEPENING)
-# ============================================================================
+
+# ITERATIVE DEEPENING
 def large_dataset_schedule(data):
     """Handle large scheduling problems efficiently using Iterative Deepening"""
     print("\n" + "=" * 70)
@@ -340,9 +302,9 @@ def large_dataset_schedule(data):
     else:
         print("\n[FAIL] Could not generate schedule")
 
-# ============================================================================
+
 # MAIN FUNCTION
-# ============================================================================
+
 def main():
     """Main function with specialized scheduling modes"""
     print("\n" + "=" * 70)
@@ -368,7 +330,7 @@ def main():
         print("SCHEDULING MODE")
         print("=" * 70)
         print("What would you like to do?\n")
-        print("1. Quick Schedule")
+        print("1. Valid Schedule")
         print("   -> Get any valid schedule fast")
         print("   -> Best for: Initial scheduling, testing\n")
         

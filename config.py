@@ -1,9 +1,4 @@
-# config.py - COMPLETE CONFIGURATION FILE
-"""
-Configuration for University Scheduling System
-"""
 
-# ==================== ALGORITHM CONFIGURATION ====================
 ALGORITHM_CONFIG = {
     'csp': {
         'max_backtracks': 1000,
@@ -51,14 +46,14 @@ ALGORITHM_CONFIG = {
     }
 }
 
-# ==================== TIME SETTINGS ====================
+
 TIME_SLOTS = [
-    "8:00-9:30",   # Slot 0
-    "9:30-11:00",  # Slot 1
-    "11:00-12:30", # Slot 2
-    "13:00-14:30", # Slot 3
-    "14:30-16:00", # Slot 4
-    "16:00-17:30", # Slot 5
+    "8:00-9:30",  
+    "9:30-11:00", 
+    "11:00-12:30", 
+    "13:00-14:30", 
+    "14:30-16:00", 
+    "16:00-17:30",
 ]
 
 DAYS = [
@@ -68,12 +63,10 @@ DAYS = [
     "thursday",
     "friday"
 ]
-
-SLOT_DURATION = 1.5  # hours
+SLOT_DURATION = 1.5  
 MAX_PROFESSOR_HOURS = 12
 WORK_HOURS = {"start": "8:00", "end": "18:00"}
 
-# ==================== FITNESS WEIGHTS ====================
 FITNESS_WEIGHTS = {
     'hard_constraint_violation': -10000,
     'empty_schedule_penalty': -10000,

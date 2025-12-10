@@ -1,7 +1,3 @@
-"""
-Data Loader Module
-Converts JSON data to model objects
-"""
 from models import course, room, professor
 
 def json_to_models(json_data):
@@ -65,15 +61,6 @@ def json_to_models(json_data):
     }
 
 def load_from_json_file(filename):
-    """
-    Load data from JSON file and convert to model objects
-    
-    Args:
-        filename: Path to JSON file
-    
-    Returns:
-        Dictionary with model objects
-    """
     import json
     
     with open(filename, 'r') as f:

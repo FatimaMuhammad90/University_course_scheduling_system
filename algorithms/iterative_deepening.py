@@ -1,27 +1,10 @@
-# algorithms/iterative_deepening.py - UPDATED VERSION
-"""
-Iterative Deepening Depth-First Search for course scheduling
-"""
+
 
 import config
 from models import schedule
 
 def iterative_deepening(initial_schedule, max_depth=None):
-    """
-    Iterative Deepening Depth-First Search
-    
-    Combines benefits of BFS (completeness) and DFS (memory efficiency)
-    by repeatedly running depth-limited search with increasing depth limits.
-    
-    Args:
-        initial_schedule: Starting schedule object
-        max_depth: Maximum depth to search (uses config if None)
-    
-    Returns:
-        schedule object if solution found, None otherwise
-    """
-    
-    # Get parameters from config or use defaults
+
     if max_depth is None:
         try:
             max_depth = config.ALGORITHM_CONFIG['iterative_deepening']['max_depth']
@@ -35,7 +18,6 @@ def iterative_deepening(initial_schedule, max_depth=None):
     
     print(f"Starting Iterative Deepening (max_depth={max_depth})...")
     
-    # Try increasing depth limits
     for depth in range(1, max_depth + 1, depth_increment):
         print(f"\nTrying depth limit: {depth}")
         
@@ -49,18 +31,7 @@ def iterative_deepening(initial_schedule, max_depth=None):
     print(" Iterative Deepening could not find solution within depth limit")
     return None
 
-def depth_limited_search(initial_schedule, depth_limit):
-    """
-    Depth-limited search (DFS with depth limit)
-    
-    Args:
-        initial_schedule: Starting schedule
-        depth_limit: Maximum search depth
-    
-    Returns:
-        schedule object if solution found, None otherwise
-    """
-    
+def depth_limited_search(initial_schedule, depth_limit):    
     visited = set()
     nodes_expanded = 0
     
@@ -75,12 +46,11 @@ def depth_limited_search(initial_schedule, depth_limit):
         if len(path) == len(current_sched.courses):
             if current_sched.is_valid():
                 return current_sched
-        
-        # Depth limit reached
+    
         if depth >= depth_limit:
             return None
         
-        # Find next course to schedule (MRV heuristic)
+        #MRV 
         next_course = None
         min_options = float('inf')
         
@@ -88,7 +58,6 @@ def depth_limited_search(initial_schedule, depth_limit):
             if course.assigned_time is not None:
                 continue
             
-            # Count possible assignments for this course
             options = count_possible_assignments(course, current_sched)
             if options < min_options and options > 0:
                 min_options = options
@@ -96,8 +65,7 @@ def depth_limited_search(initial_schedule, depth_limit):
         
         if not next_course:
             return None
-        
-        # Get days and time slots
+    
         try:
             from config import DAYS, TIME_SLOTS
             days = DAYS
@@ -106,8 +74,8 @@ def depth_limited_search(initial_schedule, depth_limit):
             days = ["monday", "tuesday", "wednesday", "thursday", "friday"]
             time_slots = ["8:00-9:30", "9:30-11:00", "11:00-12:30", 
                          "13:00-14:30", "14:30-16:00", "16:00-17:30"]
-        
-        # Generate all possible assignments
+
+
         assignments = []
         for room in current_sched.rooms:
             if not room.can_accommodate(next_course):
@@ -123,7 +91,6 @@ def depth_limited_search(initial_schedule, depth_limit):
                                 prof.is_available(day, time_slot)):
                             continue
                         
-                        # Calculate preference score for ordering
                         score = 0
                         time_of_day = "morning" if time_slot <= 2 else "afternoon"
                         if hasattr(next_course, 'preferred_times') and time_of_day in next_course.preferred_times:
@@ -137,14 +104,13 @@ def depth_limited_search(initial_schedule, depth_limit):
                         
                         assignments.append((room, prof, day, time_slot, score))
         
-        # Order by preference (highest first)
         assignments.sort(key=lambda x: x[4], reverse=True)
         
         # Try each assignment
         for room, prof, day, time_slot, _ in assignments:
             new_sched = current_sched.copy()
             
-            # Find objects in copied schedule
+
             new_course = next((c for c in new_sched.courses 
                              if c.course_id == next_course.course_id), None)
             new_room = next((r for r in new_sched.rooms 
@@ -156,7 +122,7 @@ def depth_limited_search(initial_schedule, depth_limit):
                 new_sched.add_assignment(new_course, new_room, new_prof, 
                                        day, time_slot)
                 
-                # Create state identifier
+
                 state_id = create_state_id(new_sched)
                 if state_id in visited:
                     continue
@@ -216,7 +182,6 @@ def count_possible_assignments(course, schedule_obj):
     return count
 
 def create_state_id(schedule_obj):
-    """Create unique identifier for a schedule state"""
     assignments = []
     for course in schedule_obj.courses:
         if course.assigned_time is not None:

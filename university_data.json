@@ -1,241 +1,139 @@
 {
     "professors": [
         {
-            "professor_id": "prof001",
-            "name": "Dr. Alice Smith",
-            "department": "Computer Science",
+            "professor_id": "P001",
+            "name": "Dr. Ali",
+            "department": "CS",
             "courses": [
-                "cs101",
-                "cs301"
+                "CS101",
+                "CS102"
             ],
-            "max_hours": 12,
+            "max_hours": 10,
             "preferences": {
                 "preferred_days": [
-                    "monday"
-                ],
-                "preferred_times": [
-                    "morning"
-                ]
-            }
-        },
-        {
-            "professor_id": "prof002",
-            "name": "Dr. Bob Johnson",
-            "department": "Computer Science",
-            "courses": [
-                "cs102",
-                "cs202"
-            ],
-            "max_hours": 12,
-            "preferences": {
-                "preferred_days": [
-                    "tuesday"
-                ],
-                "preferred_times": [
-                    "afternoon"
-                ]
-            }
-        },
-        {
-            "professor_id": "prof003",
-            "name": "Dr. Carol Williams",
-            "department": "Computer Science",
-            "courses": [
-                "cs201"
-            ],
-            "max_hours": 12,
-            "preferences": {
-                "preferred_days": [
+                    "monday",
                     "wednesday"
-                ],
-                "preferred_times": [
-                    "morning"
                 ]
             }
         },
         {
-            "professor_id": "prof004",
-            "name": "Dr. David Brown",
-            "department": "Computer Science",
+            "professor_id": "P002",
+            "name": "Prof. fatima",
+            "department": "CS",
             "courses": [
-                "cs102",
-                "cs301"
+                "CS201",
+                "CS202"
             ],
-            "max_hours": 12,
+            "max_hours": 8,
             "preferences": {
                 "preferred_days": [
+                    "tuesday",
                     "thursday"
-                ],
+                ]
+            }
+        },
+        {
+            "professor_id": "P003",
+            "name": "Dr. amna",
+            "department": "Math",
+            "courses": [
+                "MATH101"
+            ],
+            "max_hours": 6,
+            "preferences": {
                 "preferred_times": [
-                    "afternoon"
+                    0,
+                    1,
+                    2
                 ]
             }
         }
     ],
     "rooms": [
         {
-            "room_id": "room101",
-            "name": "CS Building Room 101",
-            "capacity": 80,
-            "room_type": "lecture_hall",
-            "features": [
-                "projector",
-                "whiteboard"
-            ],
-            "building": "Computer Science Building",
-            "cost_per_hour": 15.0
-        },
-        {
-            "room_id": "room102",
-            "name": "CS Building Room 102",
-            "capacity": 60,
-            "room_type": "lecture_hall",
-            "features": [
-                "projector",
-                "whiteboard"
-            ],
-            "building": "Computer Science Building",
-            "cost_per_hour": 20.0
-        },
-        {
-            "room_id": "room103",
-            "name": "CS Building Room 103",
+            "room_id": "R101",
+            "name": "Lecture Hall A",
             "capacity": 50,
-            "room_type": "lecture_hall",
-            "features": [
-                "projector",
-                "whiteboard"
-            ],
-            "building": "Computer Science Building",
-            "cost_per_hour": 12.0
+            "room_type": "Lecture",
+            "building": "Science Building",
+            "cost_per_hour": 50.0
         },
         {
-            "room_id": "room201",
-            "name": "CS Building Room 201",
-            "capacity": 45,
-            "room_type": "lecture_hall",
-            "features": [
-                "projector"
-            ],
-            "building": "Computer Science Building",
-            "cost_per_hour": 18.0
-        },
-        {
-            "room_id": "lab301",
-            "name": "CS Building Lab 301",
-            "capacity": 40,
-            "room_type": "lab",
+            "room_id": "R102",
+            "name": "Lab 1",
+            "capacity": 30,
+            "room_type": "Lab",
+            "building": "Arts Building",
             "features": [
                 "computers",
                 "projector"
             ],
-            "building": "Computer Science Building",
-            "cost_per_hour": 25.0
+            "cost_per_hour": 75.0
         },
         {
-            "room_id": "lab302",
-            "name": "CS Building Lab 302",
-            "capacity": 35,
-            "room_type": "lab",
-            "features": [
-                "computers",
-                "projector"
-            ],
-            "building": "Computer Science Building",
-            "cost_per_hour": 22.0
+            "room_id": "R201",
+            "name": "Seminar Room",
+            "capacity": 20,
+            "room_type": "Seminar",
+            "building": "Enigneering Buliding",
+            "cost_per_hour": 40.0
         }
     ],
     "courses": [
         {
-            "course_id": "cs101",
-            "name": "Introduction to Programming",
-            "department": "Computer Science",
-            "credits": 3,
-            "students": 60,
-            "course_type": "lecture",
-            "professors": [
-                "prof001"
-            ],
-            "prerequisites": [],
-            "preferred_times": [
-                "morning"
-            ],
-            "required_rooms": [
-                "projector"
-            ]
-        },
-        {
-            "course_id": "cs102",
-            "name": "Data Structures",
-            "department": "Computer Science",
-            "credits": 3,
+            "course_id": "CS101",
+            "name": "Intro to CS",
+            "department": "CS",
             "students": 45,
-            "course_type": "lecture",
+            "course_type": "Lecture",
             "professors": [
-                "prof002",
-                "prof004"
-            ],
-            "prerequisites": [],
-            "preferred_times": [
-                "afternoon"
-            ],
-            "required_rooms": [
-                "projector"
+                "P001"
             ]
         },
         {
-            "course_id": "cs201",
-            "name": "Algorithms",
-            "department": "Computer Science",
-            "credits": 3,
+            "course_id": "CS102",
+            "name": "Programming Lab",
+            "department": "CS",
+            "students": 25,
+            "course_type": "Lab",
+            "professors": [
+                "P001"
+            ],
+            "required_rooms": [
+                "R102"
+            ]
+        },
+        {
+            "course_id": "CS201",
+            "name": "Data Structures",
+            "department": "CS",
             "students": 40,
-            "course_type": "lecture",
+            "course_type": "Lecture",
             "professors": [
-                "prof003"
+                "P002"
             ],
-            "prerequisites": [],
-            "preferred_times": [
-                "morning"
-            ],
-            "required_rooms": [
-                "projector"
+            "prerequisites": [
+                "CS101"
             ]
         },
         {
-            "course_id": "cs202",
-            "name": "Database Systems",
-            "department": "Computer Science",
-            "credits": 3,
+            "course_id": "CS202",
+            "name": "Algorithms",
+            "department": "CS",
             "students": 35,
-            "course_type": "lecture",
+            "course_type": "Lecture",
             "professors": [
-                "prof002"
-            ],
-            "prerequisites": [],
-            "preferred_times": [
-                "afternoon"
-            ],
-            "required_rooms": [
-                "projector"
+                "P002"
             ]
         },
         {
-            "course_id": "cs301",
-            "name": "Software Engineering",
-            "department": "Computer Science",
-            "credits": 3,
-            "students": 30,
-            "course_type": "lecture",
+            "course_id": "MATH101",
+            "name": "Calculus I",
+            "department": "Math",
+            "students": 48,
+            "course_type": "Lecture",
             "professors": [
-                "prof001",
-                "prof004"
-            ],
-            "prerequisites": [],
-            "preferred_times": [
-                "morning"
-            ],
-            "required_rooms": [
-                "projector"
+                "P003"
             ]
         }
     ]

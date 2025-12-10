@@ -95,13 +95,4 @@ The best schedule will be:
 
 ## Troubleshooting
 
-**Q: No valid schedule found?**
-- Check that professors can teach the courses assigned to them
-- Ensure room capacities are sufficient
-- Verify there are enough time slots for all courses
-
-**Q: Empty schedule with positive fitness?**
-- This bug has been fixed! Empty schedules now get -10,000 fitness score
-
-**Q: Schedule shows "No classes scheduled" but says courses are assigned?**
-- This display bug has been fixed! Courses now show correctly on their assigned days
+**

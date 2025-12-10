@@ -114,7 +114,7 @@ def get_valid_times():
         times_input = input("Preferred times (comma-separated, e.g., morning,afternoon): ").strip()
         
         if not times_input:
-            print(f"  ✗ Please enter at least one time preference")
+            print(f"Please enter at least one time preference")
             continue
         
         times = [t.strip().lower() for t in times_input.split(",")]
@@ -122,8 +122,8 @@ def get_valid_times():
         # Validate all times
         invalid_times = [t for t in times if t not in valid_times]
         if invalid_times:
-            print(f"  ✗ Invalid times: {', '.join(invalid_times)}")
-            print(f"     Valid times: {', '.join(valid_times)}")
+            print(f" Invalid times: {', '.join(invalid_times)}")
+            print(f"  Valid times: {', '.join(valid_times)}")
             continue
         
         return times
@@ -148,7 +148,7 @@ def collect_professors():
             if prof_id not in professor_ids:
                 professor_ids.append(prof_id)
                 break
-            print(f"  ✗ Professor ID '{prof_id}' already exists. Please use a unique ID.")
+            print(f" Professor ID '{prof_id}' already exists. Please use a unique ID.")
         
         prof_data = {
             "professor_id": prof_id,
@@ -163,7 +163,7 @@ def collect_professors():
         }
         
         professors.append(prof_data)
-        print(f"  ✓ Added professor: {prof_data['name']}")
+        print(f" Added professor: {prof_data['name']}")
     
     return professors
 
@@ -200,7 +200,7 @@ def collect_rooms():
         }
         
         rooms.append(room_data)
-        print(f"  ✓ Added room: {room_data['name']}")
+        print(f" Added room: {room_data['name']}")
     
     return rooms
 
@@ -213,7 +213,7 @@ def collect_courses():
     
     num_courses = get_positive_int("\nHow many courses do you want to add? ")
     
-    course_ids = []  # Track IDs to prevent duplicates
+    course_ids = []  
     
     for i in range(num_courses):
         print(f"\n--- Course {i+1}/{num_courses} ---")
@@ -245,7 +245,7 @@ def collect_courses():
         )
         
         courses.append(course_data)
-        print(f"  ✓ Added course: {course_data['name']}")
+        print(f"Added course: {course_data['name']}")
     
     return courses
 
@@ -262,7 +262,7 @@ def save_data_to_json(professors, rooms, courses, filename="data/schedule_data.j
     with open(filename, "w") as f:
         json.dump(data, f, indent=2)
     
-    print(f"\n  ✓ Data saved to {filename}")
+    print(f"\n Data saved to {filename}")
     return filename
 
 def load_data_from_json(filename="data/schedule_data.json"):

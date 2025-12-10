@@ -9,7 +9,6 @@ class hill_climbing:
         self.best_fitness = schedule_obj.calculate_fitness()
     
     def optimize(self):
-        """Hill climbing optimization with random restarts"""
         print("Starting Hill Climbing optimization...")
         
         current = self.schedule.copy()

@@ -1,120 +1,206 @@
-# algorithms/bfs.py - FIXED NAMES
 from collections import deque
 import config
-from models import schedule
+
 
 def bfs(initial_schedule, max_depth=None):
-    """BFS for course scheduling"""
     if max_depth is None:
-        max_depth = config.ALGORITHM_CONFIG['bfs']['max_depth']
+        max_depth = 5  
     
-    print("Starting BFS...")
+    print("\n[BFS Algorithm Starting]")
+    print(f"  Courses to schedule: {len(initial_schedule.courses)}")
+    print(f"  Max search depth: {max_depth}")
     
-    # Queue: (schedule, depth, path)
+    initial_state = initial_schedule.copy()
+    
+    # schedule, depth
     queue = deque()
-    queue.append((initial_schedule.copy(), 0, []))
+    queue.append((initial_state, 0))
     
     visited = set()
     nodes_expanded = 0
+    max_queue_size = 0
     
-    while queue and nodes_expanded < config.ALGORITHM_CONFIG['bfs']['max_nodes']:
-        current_sched, depth, path = queue.popleft()
+    while queue and nodes_expanded < 10000:
+        current_schedule, depth = queue.popleft()
         nodes_expanded += 1
         
         if nodes_expanded % 100 == 0:
-            print(f"\rBFS: Depth {depth}, Queue: {len(queue)}, Nodes: {nodes_expanded}", end="")
+            print(f"\r  Explored {nodes_expanded} states, queue: {len(queue)}", end="")
         
-        # Check if complete
-        if len(path) == len(current_sched.courses):
-            if current_sched.is_valid():
-                print(f"\n✅ BFS found solution at depth {depth}")
-                print(f"   Nodes: {nodes_expanded}, Fitness: {current_sched.calculate_fitness():.2f}")
-                return current_sched
+        # check karey if current schedule is complete and valid
+        if is_schedule_complete(current_schedule):
+            if current_schedule.is_valid():
+                print(f"\n\n[SUCCESS] Found valid schedule!")
+                print(f"  Nodes expanded: {nodes_expanded}")
+                print(f"  Search depth: {depth}")
+                print(f"  Courses scheduled: {len(current_schedule.assignments)}/{len(current_schedule.courses)}")
+                return current_schedule
         
         if depth >= max_depth:
             continue
         
-        # Find next course to schedule (MRV)
-        next_course = None
-        min_options = float('inf')
+        # Find unscheduled courses
+        scheduled_course_ids = get_scheduled_course_ids(current_schedule)
+        unscheduled_courses = [
+            course for course in current_schedule.courses 
+            if course.course_id not in scheduled_course_ids
+        ]
         
-        for course in current_sched.courses:
-            if course.assigned_time is not None:
-                continue
-            
-            # Count options for this course
-            options = 0
-            for room in current_sched.rooms:
-                if not room.can_accommodate(course):
-                    continue
-                for prof in current_sched.professors:
-                    if not prof.can_teach(course.course_id):
-                        continue
-                    for day in config.DAYS:
-                        for time in range(len(config.TIME_SLOTS)):
-                            if (room.is_available(day, time) and 
-                                prof.is_available(day, time)):
-                                options += 1
-            
-            if options < min_options:
-                min_options = options
-                next_course = course
-        
-        if not next_course:
+        if not unscheduled_courses:
             continue
         
-        # Generate all possible assignments
-        for room in current_sched.rooms:
+        next_course = unscheduled_courses[0]
+    
+        for room in current_schedule.rooms:
             if not room.can_accommodate(next_course):
                 continue
             
-            for prof in current_sched.professors:
-                if not prof.can_teach(next_course.course_id):
+            for professor in current_schedule.professors:
+                if not professor.can_teach(next_course.course_id):
                     continue
                 
                 for day in config.DAYS:
                     for time_slot in range(len(config.TIME_SLOTS)):
+                        # Check availability
                         if not (room.is_available(day, time_slot) and 
-                                prof.is_available(day, time_slot)):
+                                professor.is_available(day, time_slot)):
                             continue
                         
-                        new_sched = current_sched.copy()
+                        # Create new schedule with this assignment
+                        new_schedule = current_schedule.copy()
                         
-                        # Find objects in copied schedule
-                        new_course = next((c for c in new_sched.courses 
-                                         if c.course_id == next_course.course_id), None)
-                        new_room = next((r for r in new_sched.rooms 
-                                       if r.room_id == room.room_id), None)
-                        new_prof = next((p for p in new_sched.professors 
-                                       if p.professor_id == prof.professor_id), None)
+                        # Find corresponding objects in the copy
+                        new_course = find_course(new_schedule, next_course.course_id)
+                        new_room = find_room(new_schedule, room.room_id)
+                        new_prof = find_professor(new_schedule, professor.professor_id)
                         
-                        if new_course and new_room and new_prof:
-                            new_sched.add_assignment(new_course, new_room, new_prof, 
-                                                   day, time_slot)
-                            
-                            # Create state ID
-                            state_id = create_state_id(new_sched)
-                            if state_id in visited:
-                                continue
-                            visited.add(state_id)
-                            
-                            new_path = path + [{
-                                'course': new_course.course_id,
-                                'room': new_room.room_id,
-                                'prof': new_prof.professor_id,
-                                'day': day,
-                                'time': time_slot
-                            }]
-                            
-                            queue.append((new_sched, depth + 1, new_path))
+                        if not (new_course and new_room and new_prof):
+                            continue
+                        
+                        # Make the assignment
+                        success = new_schedule.add_assignment(
+                            new_course, new_room, new_prof, day, time_slot
+                        )
+                        
+                        if not success:
+                            continue
+                        
+                        # Create state ID and check for duplicates
+                        state_id = create_state_id(new_schedule)
+                        if state_id in visited:
+                            continue
+                        
+                        visited.add(state_id)
+                        queue.append((new_schedule, depth + 1))
+                        
+                        # Track max queue size
+                        if len(queue) > max_queue_size:
+                            max_queue_size = len(queue)
     
-    print(f"\n❌ BFS exhausted search ({nodes_expanded} nodes)")
+    print(f"\n\n[FAILED] No valid schedule found")
+    print(f"  Total nodes expanded: {nodes_expanded}")
+    print(f"  Maximum queue size: {max_queue_size}")
+    print(f"  Visited states: {len(visited)}")
+    
     return None
 
+
+def is_schedule_complete(schedule_obj):
+    """Check if all courses are scheduled"""
+    if not hasattr(schedule_obj, 'assignments'):
+        return False
+    
+    scheduled_course_ids = get_scheduled_course_ids(schedule_obj)
+    all_course_ids = {course.course_id for course in schedule_obj.courses}
+    
+    return scheduled_course_ids == all_course_ids
+
+
+def get_scheduled_course_ids(schedule_obj):
+    """Extract course IDs from assignments (handles both dict and object formats)"""
+    scheduled_ids = set()
+    
+    if not hasattr(schedule_obj, 'assignments'):
+        return scheduled_ids
+    
+    for assignment in schedule_obj.assignments:
+        if isinstance(assignment, dict):
+            # Dictionary format
+            if 'course_id' in assignment:
+                scheduled_ids.add(assignment['course_id'])
+            elif 'course' in assignment and hasattr(assignment['course'], 'course_id'):
+                scheduled_ids.add(assignment['course'].course_id)
+        else:
+            # Object format
+            if hasattr(assignment, 'course') and hasattr(assignment.course, 'course_id'):
+                scheduled_ids.add(assignment.course.course_id)
+            elif hasattr(assignment, 'course_id'):
+                scheduled_ids.add(assignment.course_id)
+    
+    return scheduled_ids
+
+
 def create_state_id(schedule_obj):
-    assignments = []
+    """Create a unique ID for a schedule state"""
+    if not hasattr(schedule_obj, 'assignments') or not schedule_obj.assignments:
+        return "empty"
+    
+    parts = []
+    
+    for assignment in schedule_obj.assignments:
+        if isinstance(assignment, dict):
+            # Dictionary format
+            course_id = assignment.get('course_id', '')
+            day = assignment.get('day', '')
+            time_slot = assignment.get('time_slot', '')
+            room_id = assignment.get('room_id', '')
+            prof_id = assignment.get('professor_id', '')
+        else:
+            # Object format
+            if hasattr(assignment, 'course') and hasattr(assignment.course, 'course_id'):
+                course_id = assignment.course.course_id
+            else:
+                course_id = getattr(assignment, 'course_id', '')
+            
+            day = getattr(assignment, 'day', '')
+            time_slot = getattr(assignment, 'time_slot', '')
+            
+            if hasattr(assignment, 'room') and hasattr(assignment.room, 'room_id'):
+                room_id = assignment.room.room_id
+            else:
+                room_id = getattr(assignment, 'room_id', '')
+            
+            if hasattr(assignment, 'professor') and hasattr(assignment.professor, 'professor_id'):
+                prof_id = assignment.professor.professor_id
+            else:
+                prof_id = getattr(assignment, 'professor_id', '')
+        
+        parts.append(f"{course_id}:{day}:{time_slot}:{room_id}:{prof_id}")
+    
+    # Sort for consistent ordering
+    parts.sort()
+    return "|".join(parts)
+
+
+def find_course(schedule_obj, course_id):
+    """Find a course by ID in the schedule"""
     for course in schedule_obj.courses:
-        if course.assigned_time is not None:
-            assignments.append(f"{course.course_id}:{course.assigned_day}:{course.assigned_time}")
-    assignments.sort()
-    return "|".join(assignments)
+        if course.course_id == course_id:
+            return course
+    return None
+
+
+def find_room(schedule_obj, room_id):
+    """Find a room by ID in the schedule"""
+    for room in schedule_obj.rooms:
+        if room.room_id == room_id:
+            return room
+    return None
+
+
+def find_professor(schedule_obj, professor_id):
+    """Find a professor by ID in the schedule"""
+    for professor in schedule_obj.professors:
+        if professor.professor_id == professor_id:
+            return professor
+    return None

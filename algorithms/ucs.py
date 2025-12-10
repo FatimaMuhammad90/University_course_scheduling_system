@@ -65,7 +65,7 @@ class ucs:
                               (new_cost, self.node_counter, successor, new_assignments))
                 self.node_counter += 1
         
-        print(f"\n❌ UCS could not find solution")
+        print(f"\n UCS could not find solution")
         return None
     
     def generate_successors(self, schedule_obj, assignments):

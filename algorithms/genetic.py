@@ -10,7 +10,6 @@ class genetic:
         self.best_schedule = None
     
     def create_population(self):
-        """Create initial population of schedules"""
         print(f"Creating population of {config.ALGORITHM_CONFIG['genetic']['population_size']}...")
         self.population = []
         
@@ -74,18 +73,16 @@ class genetic:
             # Create new generation
             new_population = []
             
-            # Elitism: keep best individuals
+            #best individuals rehrin
             elitism_count = config.ALGORITHM_CONFIG['genetic']['elitism_count']
             new_population.extend(self.population[:elitism_count])
             
-            # Create offspring
+            # offspring
             while len(new_population) < len(self.population):
                 parent1, parent2 = random.sample(parents, 2)
                 
-                # Crossover
                 child = self.crossover(parent1, parent2)
-                
-                # Mutation
+            
                 if random.random() < config.ALGORITHM_CONFIG['genetic']['mutation_rate']:
                     child = self.mutate(child)
                 
@@ -122,10 +119,9 @@ class genetic:
         return selected
     
     def crossover(self, parent1, parent2):
-        """Uniform crossover between two schedules"""
+    
         child = parent1.copy()
         
-        # For each course, randomly choose assignment from either parent
         for course in child.courses:
             if random.random() < 0.5:
                 # Get assignment from parent2
@@ -150,22 +146,20 @@ class genetic:
         return child
     
     def mutate(self, schedule_obj):
-        """Mutation: randomly change some assignments"""
         mutated = schedule_obj.copy()
         
         # Randomly select some courses to mutate
-        mutation_rate = 0.1  # 10% of courses
+        mutation_rate = 0.1  
         courses_to_mutate = [c for c in mutated.courses 
                            if random.random() < mutation_rate]
         
         for course in courses_to_mutate:
-            # Remove current assignment if exists
             current_assignment = next((a for a in mutated.assignments 
                                      if a['course_id'] == course.course_id), None)
             if current_assignment:
                 mutated.remove_assignment(current_assignment)
             
-            # Try to find new assignment
+            # yeh new assignment find karey
             available_rooms = [r for r in mutated.rooms if r.can_accommodate(course)]
             available_profs = [p for p in mutated.professors 
                              if p.can_teach(course.course_id)]
@@ -184,27 +178,21 @@ class genetic:
                         break
         
         return mutated
-    # In algorithms/genetic.py, update create_random_schedule():
 
     def create_random_schedule(self):
-        """Create a random valid schedule WITH ASSIGNMENTS"""
         new_schedule = self.schedule.copy()
-        
-        # Try to assign ALL courses
+
         for course in new_schedule.courses:
-            # Find available rooms
             available_rooms = [r for r in new_schedule.rooms 
                             if r.can_accommodate(course)]
             if not available_rooms:
                 continue
-            
-            # Find available professors
+
             available_profs = [p for p in new_schedule.professors 
                             if p.can_teach(course.course_id)]
             if not available_profs:
                 continue
             
-            # Try to find a valid time slot (MORE ATTEMPTS)
             max_attempts = 200
             assigned = False
             
@@ -221,7 +209,6 @@ class genetic:
                     break
             
             if not assigned:
-                # Couldn't assign this course - schedule is incomplete
-                pass  # We'll still use it but fitness will be lower
-        
+                # can't assign schedule
+                pass 
         return new_schedule
